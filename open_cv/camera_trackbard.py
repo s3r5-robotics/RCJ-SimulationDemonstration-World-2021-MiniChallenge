@@ -6,11 +6,12 @@ robot = Robot()
 timestep = int(robot.getBasicTimeStep())
 
 camera1 = robot.getDevice("camera1")
-camera2 = robot.getDevice("camera2")
-camera3 = robot.getDevice("camera3")
+
+distanceSensor = robot.getDevice("distance sensor1")
 camera1.enable(timestep)
-camera2.enable(timestep)
-camera3.enable(timestep)
+
+distanceSensor.enable(timestep) 
+
 
 def empty(a):
     pass
@@ -40,12 +41,11 @@ def distanceMeasuring(binaryImage):
 
 while robot.step(timestep) != -1:
     image1 = imageSetUp(camera1)
-    image2 = imageSetUp(camera2)
-    image3 = imageSetUp(camera3)
+
+    distance = distanceSensor.getValue()
+    print("Distance: " + str(distance*100))
 
     hsv_image1 = cv.cvtColor(image1, cv.COLOR_BGRA2BGR)
-    hsv_image2 = cv.cvtColor(image2, cv.COLOR_BGRA2BGR)
-    hsv_image3 = cv.cvtColor(image3, cv.COLOR_BGRA2BGR)
 
     hue_min=cv.getTrackbarPos("hue mini", "trackBars")
     hue_max=cv.getTrackbarPos("hue max", "trackBars")
@@ -60,19 +60,13 @@ while robot.step(timestep) != -1:
     upper = np.array([hue_max, saturation_max, max_value])
     
     mask1 = cv.inRange(hsv_image1, lower, upper)
-    mask2 = cv.inRange(hsv_image2, lower, upper)
-    mask3 = cv.inRange(hsv_image3, lower, upper)
-    imgResult1 = cv.bitwise_and(image1, image1, mask=mask1)
-    imgResult2 = cv.bitwise_and(image2, image2, mask=mask2)
-    imgResult3 = cv.bitwise_and(image3, image3, mask=mask3)
 
-    mask_images_result = cv.hconcat([mask1, mask2, mask3])
-    final_results = cv.hconcat([imgResult1, imgResult2, imgResult3])
+    imgResult1 = cv.bitwise_and(image1, image1, mask=mask1)
+
+    cv.imshow("camera_mask", mask1)
+    cv.imshow("camera_result", imgResult1)
     
-    cropped_image = mask2[]
-    cv.imshow("Camera panel masks", mask_images_result)
-    cv.imshow("Camera panel final results", final_results)
-    distanceMeasuring(mask2)
+
     cv.waitKey(1)
     
 
