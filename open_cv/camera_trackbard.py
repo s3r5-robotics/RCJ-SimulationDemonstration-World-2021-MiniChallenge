@@ -9,10 +9,11 @@ timestep = int(robot.getBasicTimeStep())
 camera1 = robot.getDevice("camera1")
 camera2 = robot.getDevice("camera2")
 camera3 = robot.getDevice("camera3")
+distanceSensor = robot.getDevice("distance2")
 camera1.enable(timestep)
 camera2.enable(timestep)
 camera3.enable(timestep)
-
+distanceSensor.enable(timestep)
 
 
 def empty(a):
@@ -52,6 +53,8 @@ def distanceCalculation(pixels_height):
     
 while robot.step(timestep) != -1:
     image1 = imageSetUp(camera1)
+    distance = distanceSensor.getValue()
+    print("Distance: " + str(distance*100))
 
 
     hsv_image1 = cv.cvtColor(image1, cv.COLOR_BGRA2BGR)
