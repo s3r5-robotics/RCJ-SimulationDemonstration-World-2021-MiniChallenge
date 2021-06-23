@@ -321,16 +321,18 @@ class RobotLayer:
             else:
                 direction = orientation
 
-            if moveDiff > 10:
-                if direction == "right":
-                    self.moveWheels(speedFract * -1, speedFract)
-                elif direction == "left":
-                    self.moveWheels(speedFract, speedFract * -1)
+            
+            if direction == "right":
+                self.moveWheels(speedFract * -1, speedFract)
+            elif direction == "left":
+                self.moveWheels(speedFract, speedFract * -1)
+            """
             else: 
                 if direction == "right":
                     self.moveWheels(speedFract * -0.5, speedFract)
                 elif direction == "left":
                     self.moveWheels(speedFract, speedFract * -0.5)
+            """
             #print("speed fract: " +  str(speedFract))
             #print("target angle: " +  str(degs))
             #print("moveDiff: " + str(moveDiff))
@@ -434,7 +436,7 @@ class RobotLayer:
         # Saves the previous global position
         self.prevGlobalPosition = self.globalPosition
         # Gets global position and applies offsets
-        self.globalPosition = None
+        self.globalPosition = [0, 0]
         self.globalPosition[0] += self.positionOffsets[0]
         self.globalPosition[1] += self.positionOffsets[1]
 
