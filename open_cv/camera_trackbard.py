@@ -1,3 +1,4 @@
+from typing import Counter
 from controller import Robot, Camera
 import cv2  as cv
 import numpy as np
@@ -6,11 +7,12 @@ robot = Robot()
 timestep = int(robot.getBasicTimeStep())
 
 camera1 = robot.getDevice("camera1")
-
-distanceSensor = robot.getDevice("distance sensor1")
+camera2 = robot.getDevice("camera2")
+camera3 = robot.getDevice("camera3")
 camera1.enable(timestep)
+camera2.enable(timestep)
+camera3.enable(timestep)
 
-distanceSensor.enable(timestep) 
 
 
 def empty(a):
@@ -33,17 +35,24 @@ def imageSetUp(camera):
     return imageResult
 
 def distanceMeasuring(binaryImage):
-    allPoints = np.where(binaryImage == 255)
-    Y_points = allPoints[0]
-    print(allPoints[0][0])
+    counter = 0
+    for i in range(0,128):
+        if binaryImage[i][64] == 255:
+            counter += 1
+    #print(f"Pixel height --> {counter}")
+    return counter
 
 
-
+def distanceCalculation(pixels_height):
+    distanceBase = 37.11126
+    pixels_height_base = 52
+    pixels_height = pixels_height
+    distance = ( pixels_height_base * distanceBase)/ pixels_height
+    print(f"distanceCamera --> {distance}")
+    
 while robot.step(timestep) != -1:
     image1 = imageSetUp(camera1)
 
-    distance = distanceSensor.getValue()
-    print("Distance: " + str(distance*100))
 
     hsv_image1 = cv.cvtColor(image1, cv.COLOR_BGRA2BGR)
 
@@ -62,6 +71,11 @@ while robot.step(timestep) != -1:
     mask1 = cv.inRange(hsv_image1, lower, upper)
 
     imgResult1 = cv.bitwise_and(image1, image1, mask=mask1)
+
+    pixel_height = distanceMeasuring(mask1)
+    if pixel_height != 0:
+        distanceCalculation(pixel_height)
+    else: pass
 
     cv.imshow("camera_mask", mask1)
     cv.imshow("camera_result", imgResult1)
