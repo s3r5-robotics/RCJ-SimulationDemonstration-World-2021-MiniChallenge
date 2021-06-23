@@ -4,22 +4,8 @@ import numpy as np
 
 counter = 0
 grid = np.zeros((200,200,3), np.uint8)
-grid2 = np.zeros((200,200,3), np.uint8)
-grid2[0,100] = 255
 for i in range(100):
     grid[i,100] = 255
-"""   """
-row, columns, _ = grid.shape
-
-medium_column = columns/2
-all_points = np.where(grid == 255)
-pointsY = sorted(set(all_points[0]))
-pointsX = sorted(set(all_points[1]))
-""" print(pointsX)
-print("\n")
-print(pointsY)
- """
-print(medium_column)
 for i in grid:
     if i[100][0]== 255:
         counter+=1
