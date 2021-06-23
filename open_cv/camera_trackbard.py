@@ -14,10 +14,8 @@ camera2.enable(timestep)
 camera3.enable(timestep)
 distanceSensor.enable(timestep)
 
-
 def empty(a):
     pass
-
 
 cv.namedWindow("trackBars")
 cv.resizeWindow("trackBars", 640,240)
