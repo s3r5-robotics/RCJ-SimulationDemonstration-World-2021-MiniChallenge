@@ -238,12 +238,8 @@ class Grid:
                         printableArray[x][y] = 80
 
                 elif isinstance(node, VortexNode):
-                    if node.tileType == "start":
-                        printableArray[x][y] = 100
-                    elif node.occupied:
+                    if node.occupied:
                         printableArray[x][y] = 255
-                    elif node.traversed:
-                        printableArray[x][y] = 150
                     else:
                         printableArray[x][y] = 50
 
@@ -275,9 +271,9 @@ class aStarNode():
 class PathFinder:
     def __init__(self, vortexNode, wallNode, tileNode, grid, searchLimit, startNode):
         self.grid = grid
-        self.startVortex = [0, 0]
-        self.prevVortex = [0, 0]
-        self.objectiveVortex = [0, 0]
+        self.startTile = [0, 0]
+        self.prevTile = [0, 0]
+        self.objectiveTile = [0, 0]
         self.vortexNode = vortexNode
         self.wallNode = wallNode
         self.tileNode = tileNode
@@ -289,20 +285,11 @@ class PathFinder:
         if isinstance(node, VortexNode):
             raise ValueError("Invalid instance")
         if isinstance(node, WallNode):
-            raise ValueError("Invalid instance")
+            return not node.occupied
         if isinstance(node, TileNode):
-            traversable = True
-            for adjacentIndex in ((-1, 1), (1, -1), (1, 1), (-1, -1), (0, 1), (0, -1), (1, 0), (-1, 0)):
-                adjacent = self.grid.getRawNode((index[0] + adjacentIndex[0], index[1] + adjacentIndex[1]))
-                if isinstance(adjacent, TileNode):
-                    if adjacent.tileType == "hole":
-                        traversable = False
-                elif isinstance(adjacent, WallNode):
-                    if adjacent.occupied:
-                        traversable = False
-                else:
-                    raise ValueError(("invalid instance: " + str(type(adjacent))))
-            return traversable
+            if node.tileType == "hole":
+                    return False
+            return True
         return False
         
 
@@ -342,10 +329,14 @@ class PathFinder:
             children = []
             for newPosition in ((0, 1), (0, -1), (-1, 0), (1, 0)):  # Adjacent squares
                 # Get node position
+                wallPosition = (currentNode.position[0] + newPosition[0], currentNode.position[1] + newPosition[1])
                 nodePosition = (currentNode.position[0] + (newPosition[0] * 2), currentNode.position[1] + (newPosition[1] * 2))
                 # Make sure walkable terrain
+                if not self.isTraversable(wallPosition):
+                    continue
                 if not self.isTraversable(nodePosition):
                     continue
+                
                 # Create new node
                 newNode = aStarNode(currentNode, nodePosition)
                 # Append
@@ -375,14 +366,8 @@ class PathFinder:
     
     def isBfsAddable(self, index):
         node = self.grid.getRawNode(index)
-        if isinstance(node, self.vortexNode):
-            for adjacentPos in ((1, 1), (-1, 1), (1, -1), (-1, -1)):
-                adjacent = [index[0] + adjacentPos[0], index[1] + adjacentPos[1]]
-                if not self.grid.getRawNode(adjacent).traversed:
-                    return True
-            return False
-        else:
-            return False
+        if isinstance(node, self.tileNode):
+            return not node.traversed
 
     # Breath First Search algorithm
     # Returns the tiles with in order and with the distance of each one
@@ -408,6 +393,7 @@ class PathFinder:
                 found.append(coords)
             for newPosition in (0, 1), (0, -1), (-1, 0), (1, 0):
                 neighbour = [x + newPosition[0] * 2, y + newPosition[1] * 2, dist + 1]
+                neighbourWall = [x + newPosition[0], y + newPosition[1]]
                 inList = False
                 for node in visited:
                     if node[0] == neighbour[0] and node[1] == neighbour[1]:
@@ -418,25 +404,22 @@ class PathFinder:
 
                 # Make sure walkable terrain
                 try:
-                    if self.isTraversable(neighbour):
+                    if self.isTraversable(neighbour) and self.isTraversable(neighbourWall):
                         visited.append(neighbour)
                         queue.append(neighbour)
                 except IndexError:
                     pass
         return found
 
-    def getPreferabilityScore(self, node):
-        pass
+    def setStartTile(self, startRawTilePos):
+        if not isinstance(self.grid.getRawNode(startRawTilePos), self.tileNode):
+            raise ValueError("Inputed position does not correspond to a tile node")
+        if self.startTile != startRawTilePos:
+            self.prevVortex = self.startTile
 
-    def setStartVortex(self, startRawVortexPos):
-        if not isinstance(self.grid.getRawNode(startRawVortexPos), self.tileNode):
-            raise ValueError("Inputed position does not correspond to a vortex node")
-        if self.startVortex != startRawVortexPos:
-            self.prevVortex = self.startVortex
-
-        self.startVortex = startRawVortexPos
-        if not self.isTraversable(startRawVortexPos):
-            print("INITIAL VORTEX NOT TRAVERSABLE")
+        self.startTile = startRawTilePos
+        if not self.isTraversable(startRawTilePos):
+            print("INITIAL TILE NOT TRAVERSABLE")
     
     def setGrid(self, grid):
         self.grid = grid
@@ -444,10 +427,10 @@ class PathFinder:
     def getBestPath(self, orientation):
         bfsLimits = ("undefined",)
         possibleNodes = []
-        if self.isTraversable(self.startVortex):
-            bfsStart = self.startVortex
+        if self.isTraversable(self.startTile):
+            bfsStart = self.startTile
         else:
-            bfsStart = self.prevVortex
+            bfsStart = self.prevTile
         for limit in bfsLimits:
             possibleNodes = self.bfs(bfsStart, limit)
             if len(possibleNodes) > 0:
@@ -455,10 +438,10 @@ class PathFinder:
         
         if len(possibleNodes) > 0:
             bestNode = possibleNodes[0]
-            if bestNode[:2] == list(self.startVortex):
+            if bestNode[:2] == list(self.startTile):
                 bestNode = possibleNodes[1]
             for posNode in possibleNodes:
-                diff = substractLists(self.startVortex, posNode[:2])
+                diff = substractLists(self.startTile, posNode[:2])
                 #print("Diff:", diff)
                 #print("Multiplied orientation: ", multiplyLists(orientation, [-2, -2]))
                 if posNode[2] > 1:
@@ -475,7 +458,7 @@ class PathFinder:
         print("BFS NODES: ", possibleNodes)
         print("Best Node:", bestNode)
         print("AStar PATH: ", bestPath)
-        print("Start Vortex: ", self.startVortex)
+        print("Start Tile: ", self.startTile)
         return bestPath
     
 class Analyst:
@@ -489,7 +472,7 @@ class Analyst:
         self.grid = Grid(gridChunk, (100, 100))
         # Path finder
         self.pathFinder = PathFinder(VortexNode, WallNode, TileNode, self.grid, 10, [0, 0])
-        self.pathFinder.setStartVortex((1, 1))
+        self.pathFinder.setStartTile((0, 0))
         #self.pathFinder.getBestPath()
         # Variables
         self.direction = None
@@ -540,7 +523,7 @@ class Analyst:
         return (position[0] * self.posMultiplier, position[1] * self.posMultiplier)
     
     def getStartRawNodePos(self):
-        node, quadrant = self.grid.rawToProcessedNode(self.pathFinder.startVortex)
+        node, quadrant = self.grid.rawToProcessedNode(self.pathFinder.startTile)
         nodePos = self.getTilePos(node)
         
         vortexPos = self.getVortexPosInTile(quadrant)
@@ -560,12 +543,6 @@ class Analyst:
     def registerStart(self):
         self.pathFinder.startNode = self.startRawNode
         self.grid.getRawNode(self.startRawNode).tileType = "start"
-
-    def registerVictim(self):
-        self.grid.getRawNode(self.startRawNode).victimDetected = True
-    
-    def isRegisteredVictim(self):
-        return self.grid.getRawNode(self.startRawNode).victimDetected
     
     def getArrayRepresentation(self):
         return self.grid.getArrayRepresentation()
@@ -575,12 +552,12 @@ class Analyst:
 
 
         posInTile = self.getPosInTile(position)
-        #quadrant = self.getQuadrant(posInTile)
+        quadrant = self.getQuadrant(posInTile)
         self.tile = self.getTile(position)
         startRawNode = self.grid.processedToRawNode(self.tile)
         self.startRawNode = startRawNode
         #print("startRawNode: ", startRawNode)
-        self.pathFinder.setStartVortex(startRawNode)
+        self.pathFinder.setStartTile(startRawNode)
         self.pathFinder.setGrid(self.grid)
 
         vortexPosInTile = self.getVortexPosInTile(quadrant)
@@ -588,13 +565,12 @@ class Analyst:
         distToVortex = getDistance(diff)
         if distToVortex < self.positionReachedThresh:
             self.grid.getRawNode(self.startRawNode).traversed = True
-            for adjacentPos in ((1, 1), (-1, 1), (1, -1), (-1, -1), (0, 1), (1, 0), (-1, 0), (0, -1)):
-                adjacent = [self.startRawNode[0] + adjacentPos[0], self.startRawNode[1] + adjacentPos[1]]
-                self.grid.getRawNode(adjacent).traversed = True
- 
+
+        """
         if self.stoppedMoving:
             self.blockFront
             self.calculatePath = True
+        """
 
         if len(self.__bestPath):
             #print("Dist to Vortex: ", distToVortex)
