@@ -38,11 +38,13 @@ while r.doLoop():
 
     if stMg.checkState("moveForward"):
         r.seqMg.startSequence()
-        r.seqMoveWheels(0.5, -0.5)
-        r.seqDelaySec(0.1)
-        r.seqMoveWheels(-0.5, 0.5)
+        r.seqMoveWheels(0.5, 0.5)
+        r.seqDelaySec(1)
+        r.seqMoveWheels(0, 0)
+        """
         r.seqDelaySec(0.1)
         r.seqResetSequence()
+        """
 
     if stMg.checkState("followBest"):
         r.seqMg.startSequence()

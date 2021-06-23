@@ -148,9 +148,9 @@ class AbstractionLayer():
     def update(self):
         self.robot.update()
 
-        print("Time:", self.robot.time)
-        print("time without moving: ", self.timeWithoutMoving)
-        print("time left:", self.timeLeft)
+        #print("Time:", self.robot.time)
+        #print("time without moving: ", self.timeWithoutMoving)
+        #print("time left:", self.timeLeft)
         diff = [self.position[0] - self.prevPosition[0], self.position[1] - self.prevPosition[1]]
         if self.robot.getWheelDirection() < 0.1:
             self.timeWithoutMoving = 0
@@ -164,7 +164,7 @@ class AbstractionLayer():
             self.timeWithoutMoving = 0
 
         if self.doWallMapping:
-            print("Doing wall mapping")
+            #print("Doing wall mapping")
 
             if self.timeWithoutMoving > 1:
                 self.analyst.stoppedMoving = True
@@ -180,7 +180,7 @@ class AbstractionLayer():
             """
             
         colorPos, self.actualTileType = self.robot.getColorDetection()
-        print("Tile type: ", self.actualTileType)
+        #print("Tile type: ", self.actualTileType)
         self.analyst.loadColorDetection(colorPos, self.actualTileType)
         self.isTrap = self.actualTileType == "hole"
         self.analyst.update(self.position, self.rotation)

@@ -2,6 +2,7 @@ from controller import Robot
 import sys
 import numpy as np
 import struct
+import time
 
 #REMEMBER TO COPY-PASTE THIS FUNCTIONS ON TO FINAL CODE
 # v Put files directory here v
@@ -66,6 +67,39 @@ class Gyroscope:
     def setDegrees(self, degs):
         self.rotation = degsToRads(degs)
 
+# Tracks global rotation
+class Accelerometer:
+    def __init__(self, accelerometer, indexes, timeStep):
+        self.sensor = accelerometer
+        self.sensor.enable(timeStep)
+        self.oldTime = 0.0
+        self.indexes = indexes
+        self.position = [0, 0, 0]
+        self.speedInTimeStep = [0, 0, 0]
+        self.lastPos = []
+
+    # Do on every timestep
+    def update(self, time):
+        timeElapsed = time - self.oldTime  # Time passed in time step
+        accValues = substractLists(self.sensor.getValues(), [0, 9.81, 0])
+        accValues = multiplyLists(accValues, [timeElapsed, timeElapsed, timeElapsed])
+        self.speedInTimeStep = sumLists(accValues, self.speedInTimeStep)
+        print("Acc values:" + str([roundDecimal(self.speedInTimeStep[0], 10000), roundDecimal(self.speedInTimeStep[2], 10000)]))
+        posInTimeStep = multiplyLists(self.speedInTimeStep, [timeElapsed, timeElapsed, timeElapsed])#[timeElapsed ** 2, timeElapsed ** 2, timeElapsed ** 2])
+        self.lastPos = []
+        for i in posInTimeStep:
+            self.lastPos.append(roundDecimal(i, 1000))
+        self.position = sumLists(self.position, self.lastPos)
+        self.oldTime = time
+
+    # Returns the position in meters
+    def getPos(self):
+        return [self.position[0], self.position[2]]
+
+    # Sets the postion in meters
+    def setPos(self, pos):
+        self.postion = pos
+
 
 # Controlls a wheel
 class Wheel:
@@ -101,11 +135,11 @@ class ColourSensor:
     
     def __update(self):
         colour = self.sensor.getImage()
-        print("Colourimg:", colour)
+        #print("Colourimg:", colour)
         self.r = self.sensor.imageGetRed(colour, 1, 0, 0)
         self.g = self.sensor.imageGetGreen(colour, 1, 0, 0)
         self.b = self.sensor.imageGetBlue(colour, 1, 0, 0)
-        print("Colour:", self.r, self.g, self.b)
+        #print("Colour:", self.r, self.g, self.b)
     
     def __isTrap(self):
         return (35 < self.r < 45 and 35 < self.g < 45)
@@ -258,6 +292,7 @@ class RobotLayer:
 
         # Sensors and actuators
         self.gyroscope = Gyroscope(self.robot.getDevice("gyro"), 1, self.timeStep)
+        self.accelerometer = Accelerometer(self.robot.getDevice("accelerometer"), [0, 1, 2], self.timeStep)
         self.leftWheel = Wheel(self.robot.getDevice("wheel1 motor"), self.maxWheelSpeed)
         self.rightWheel = Wheel(self.robot.getDevice("wheel2 motor"), self.maxWheelSpeed) 
         self.colorSensor = ColourSensor(self.robot.getDevice("colour_sensor"), 0.037, 32)
@@ -424,11 +459,15 @@ class RobotLayer:
         self.time = self.robot.getTime()
         # Updates the gps, gyroscope
         self.gyroscope.update(self.time)
+        self.accelerometer.update(self.time)
 
         # Saves the previous global position
         self.prevGlobalPosition = self.globalPosition
         # Gets global position and applies offsets
-        self.globalPosition = [0, 0]
+        self.globalPosition = self.accelerometer.getPos()
+        
+        #print("Acc position:", str())
+
         self.globalPosition[0] += self.positionOffsets[0]
         self.globalPosition[1] += self.positionOffsets[1]
 
@@ -438,6 +477,9 @@ class RobotLayer:
         # Gets global rotation
         self.rotation = self.gyroscope.getDegrees()
 
+
         # Updates emmiter and reciever
         self.comunicator.update()
+
+        time.sleep(0.1)
 
