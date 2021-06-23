@@ -1,4 +1,3 @@
-from typing import Counter
 from controller import Robot, Camera
 import cv2  as cv
 import numpy as np
@@ -29,6 +28,7 @@ cv.createTrackbar("saturation max", "trackBars", 255, 255, empty),
 cv.createTrackbar("min value", "trackBars", 0 , 255, empty),
 cv.createTrackbar("max value", "trackBars", 22, 255, empty),
 
+
 def imageSetUp(camera):
     imageResult = camera.getImage()
     imageResult = np.frombuffer(imageResult, np.uint8).reshape((camera.getHeight(), camera.getWidth(), 4))
@@ -54,7 +54,6 @@ def distanceCalculation(pixels_height):
 while robot.step(timestep) != -1:
     image1 = imageSetUp(camera1)
     distance = distanceSensor.getValue()
-    print("Distance: " + str(distance*100))
 
 
     hsv_image1 = cv.cvtColor(image1, cv.COLOR_BGRA2BGR)
