@@ -19,26 +19,29 @@ def empty(a):
 cv.namedWindow("trackBars")
 cv.resizeWindow("trackBars", 640,240)
 cv.createTrackbar("hue mini", "trackBars", 0, 255, empty),
-cv.createTrackbar("hue max", "trackBars", 255, 255, empty),
-cv.createTrackbar("saturation mini", "trackBars", 0, 255, empty),
+cv.createTrackbar("hue max", "trackBars", 40, 255, empty),
+cv.createTrackbar("saturation mini", "trackBars", 11, 255, empty),
 cv.createTrackbar("saturation max", "trackBars", 255, 255, empty),
 cv.createTrackbar("min value", "trackBars", 0 , 255, empty),
-cv.createTrackbar("max value", "trackBars", 255, 255, empty),
+cv.createTrackbar("max value", "trackBars", 22, 255, empty),
+
+def imageSetUp(camera):
+    imageResult = camera.getImage()
+    imageResult = np.frombuffer(imageResult, np.uint8).reshape((camera.getHeight(), camera.getWidth(), 4))
+    imageResult = np.array(imageResult ,dtype=np.uint8)
+    return imageResult
+
+def distanceMeasuring(binaryImage):
+    allPoints = np.where(binaryImage == 255)
+    Y_points = allPoints[0]
+    print(allPoints[0][0])
 
 
 
 while robot.step(timestep) != -1:
-    image1 = camera1.getImage()
-    image1 = np.frombuffer(image1, np.uint8).reshape((camera1.getHeight(), camera1.getWidth(), 4))
-    image1 = np.array(image1 ,dtype=np.uint8)
-    
-    image2 = camera2.getImage()
-    image2 = np.frombuffer(image2, np.uint8).reshape((camera2.getHeight(), camera2.getWidth(), 4))
-    image2 = np.array(image2 ,dtype=np.uint8)
-    
-    image3 = camera3.getImage()
-    image3 = np.frombuffer(image3, np.uint8).reshape((camera3.getHeight(), camera3.getWidth(), 4))
-    image3 = np.array(image3, dtype=np.uint8)
+    image1 = imageSetUp(camera1)
+    image2 = imageSetUp(camera2)
+    image3 = imageSetUp(camera3)
 
     hsv_image1 = cv.cvtColor(image1, cv.COLOR_BGRA2BGR)
     hsv_image2 = cv.cvtColor(image2, cv.COLOR_BGRA2BGR)
@@ -66,6 +69,10 @@ while robot.step(timestep) != -1:
     mask_images_result = cv.hconcat([mask1, mask2, mask3])
     final_results = cv.hconcat([imgResult1, imgResult2, imgResult3])
     
+    cropped_image = mask2[]
     cv.imshow("Camera panel masks", mask_images_result)
     cv.imshow("Camera panel final results", final_results)
+    distanceMeasuring(mask2)
     cv.waitKey(1)
+    
+
