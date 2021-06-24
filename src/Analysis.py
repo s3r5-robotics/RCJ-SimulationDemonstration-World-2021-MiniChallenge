@@ -5,7 +5,7 @@ import copy
 
 
 sys.path.append(r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\Participants\\Alejandro")
-from UtilityFunctions import *
+from UtilityFunctions import * # li
 
 # Class that defines a tile node in the grid
 class TileNode:
@@ -28,7 +28,7 @@ class TileNode:
 
     def getString(self):
         return self.__typesToNumbers[self.tileType]
-    
+
 
 # Class that defines a wall node in the grid
 class WallNode:
@@ -36,7 +36,7 @@ class WallNode:
         self.dimensions = [0.06, 0.06, 0.01] # Dimensions of the wall
         self.__occupied = occupied # If there is a wall. Can be True or false.
         self.traversed = False
-    
+
     @property
     def occupied(self):
         return self.__occupied
@@ -47,7 +47,7 @@ class WallNode:
             self.__occupied = True
         else:
             self.__occupied = False
-    
+
     def getString(self):
         if len(self.fixtures):
             returnString = "".join(self.fixtures)
@@ -66,7 +66,7 @@ class VortexNode:
     @property
     def occupied(self):
         return self.__occupied
-        
+
     @occupied.setter
     def occupied(self, value):
         if value and not self.traversed:
@@ -87,7 +87,7 @@ class Grid:
         self.chunk = chunk # A chunk of nodes constituting the grid
         self.chunkSize = (len(chunk), len(chunk[0]))
         self.__constructGrid()
-        
+
     # Given a string indicating direction returns an array directing to that direction
     def directionToNumber(self, direction):
         if direction == "center" or direction == "centre":
@@ -127,7 +127,7 @@ class Grid:
 
         self.size = self.startingSize
 
-    
+
     # Adds a row at the end of the grid
     def addRowAtEnd(self):
         row = copy.deepcopy(self.chunk)
@@ -136,7 +136,7 @@ class Grid:
                 row = np.hstack((row.copy(), copy.deepcopy(self.chunk)))
             self.grid = np.vstack((self.grid.copy(), copy.deepcopy(row)))
             self.size[1] += self.chunkSize[0]
-    
+
     # Adds a row at the start of the grid
     def addRowAtStart(self):
         row = copy.deepcopy(self.chunk)
@@ -165,13 +165,13 @@ class Grid:
             self.grid = np.hstack((copy.deepcopy(column), self.grid.copy()))
             self.size[0] += self.chunkSize[1]
             self.offsets[0] += self.chunkSize[1]
-    
+
     # returns the node in the position in the grid taking in to account offsets
     def getRawNode(self, position):
         x = position[0] + self.offsets[0]
         y = position[1] + self.offsets[1]
         return self.grid[y][x]
-    
+
     # Sets a value in the position in the grid taking in to account offsets
     def setRawNode(self, position, value):
         x = position[0] + self.offsets[0]
@@ -190,7 +190,7 @@ class Grid:
         if y < self.offsets[1] * -1:
             raise IndexError("Index too small for list with min index " + str(self.offsets[0] * -1))
         return (x,y)
-    
+
     def rawToProcessedNode(self, rawNode):
         x = rawNode[0] // self.chunkSize[0]
         y = rawNode[1] // self.chunkSize[1]
@@ -206,11 +206,11 @@ class Grid:
     # Returns a node given the position of a tile and directions to indicate walls and vertices
     def getNode(self, position, side=[0,0]):
         return self.getRawNode(self.processedToRawNode(position, side))
-    
+
     # Sets a node given the position of a tile and directions to indicate walls and vertices
     def setNode(self, position, value, side=[0,0]):
         self.setRawNode(self.processedToRawNode(position, side), value)
-    
+
     def getArrayRepresentation(self):
         grid = []
         for y in self.grid:
@@ -219,7 +219,7 @@ class Grid:
                 row.append(node.getString())
             grid.append(row)
         return np.array(grid)
-                
+
 
     def getNumpyPrintableArray(self):
         printableArray = np.zeros(self.size, np.uint8)
@@ -250,9 +250,9 @@ class Grid:
                         printableArray[x][y] = 150
                     else:
                         printableArray[x][y] = 50
-        
+
         return np.flip(printableArray, 1)
-                
+
 
 # aStarNode class for A* pathfinding (Not to be confused with the node grid)
 class aStarNode():
@@ -291,7 +291,7 @@ class PathFinder:
                     return False
             return True
         return False
-        
+
 
     # Returns a list of tuples as a path from the given start to the given end in the given maze
     def aStar(self, start, end):
@@ -336,7 +336,7 @@ class PathFinder:
                     continue
                 if not self.isTraversable(nodePosition):
                     continue
-                
+
                 # Create new node
                 newNode = aStarNode(currentNode, nodePosition)
                 # Append
@@ -363,7 +363,7 @@ class PathFinder:
                     continue
                 # Add the child to the open list
                 openList.append(child)
-    
+
     def isBfsAddable(self, index):
         node = self.grid.getRawNode(index)
         if isinstance(node, self.tileNode):
@@ -388,7 +388,7 @@ class PathFinder:
             if limit != "undefined":
                 if dist > limit:
                     break
-            
+
             if self.isBfsAddable(coords):
                 found.append(coords)
             for newPosition in (0, 1), (0, -1), (-1, 0), (1, 0):
@@ -420,7 +420,7 @@ class PathFinder:
         self.startTile = startRawTilePos
         if not self.isTraversable(startRawTilePos):
             print("INITIAL TILE NOT TRAVERSABLE")
-    
+
     def setGrid(self, grid):
         self.grid = grid
 
@@ -435,7 +435,7 @@ class PathFinder:
             possibleNodes = self.bfs(bfsStart, limit)
             if len(possibleNodes) > 0:
                 break
-        
+
         if len(possibleNodes) > 0:
             bestNode = possibleNodes[0]
             if bestNode[:2] == list(self.startTile):
@@ -446,7 +446,7 @@ class PathFinder:
                 #print("Multiplied orientation: ", multiplyLists(orientation, [-2, -2]))
                 if posNode[2] > 1:
                     break
-                
+
                 elif diff == multiplyLists(orientation, [-2, -2]):
                     bestNode = posNode
                     break
@@ -460,7 +460,7 @@ class PathFinder:
         print("AStar PATH: ", bestPath)
         print("Start Tile: ", self.startTile)
         return bestPath
-    
+
 class Analyst:
     def __init__(self, tileSize):
         # Important variables
@@ -490,7 +490,7 @@ class Analyst:
         for i in ((0, 1), (1, 0), (0, -1), (-1, 0)):
             adjacents.append(sumLists(rawNode, i))
         return adjacents
-    
+
     def loadColorDetection(self, colorSensorPosition, tileType):
         convPos = self.getTile(colorSensorPosition)
         self.grid.getNode(convPos).tileType = tileType
@@ -498,7 +498,7 @@ class Analyst:
         if tileType == "hole":
             self.calculatePath = True
         """
-            
+
     def getQuadrant(self, posInTile):
         if posInTile[0] > self.tileSize / 2: x = 1
         else: x = -1
@@ -506,13 +506,13 @@ class Analyst:
         else: y = -1
         return [x, y]
 
-    
+
     def getTile(self, position):
         return (int(position[0] // self.tileSize), int(position[1] // self.tileSize))
-    
+
     def getPosInTile(self, position):
         return ((position[0] % self.tileSize), (position[1] % self.tileSize))
-    
+
     def getVortexPosInTile(self, quadrant):
         return [(self.tileSize / 2) + (quadrant[0] * (self.tileSize / 2)), (self.tileSize / 2) + (quadrant[1] * (self.tileSize / 2))]
 
@@ -521,11 +521,11 @@ class Analyst:
 
     def multiplyPos(self, position):
         return (position[0] * self.posMultiplier, position[1] * self.posMultiplier)
-    
+
     def getStartRawNodePos(self):
         node, quadrant = self.grid.rawToProcessedNode(self.pathFinder.startTile)
         nodePos = self.getTilePos(node)
-        
+
         vortexPos = self.getVortexPosInTile(quadrant)
         return [nodePos[0] + vortexPos[0], nodePos[1] + vortexPos[1]]
 
@@ -543,7 +543,7 @@ class Analyst:
     def registerStart(self):
         self.pathFinder.startNode = self.startRawNode
         self.grid.getRawNode(self.startRawNode).tileType = "start"
-    
+
     def getArrayRepresentation(self):
         return self.grid.getArrayRepresentation()
 
@@ -595,7 +595,7 @@ class Analyst:
                 self.ended = True
             self.calculatePath = False
 
-    
+
     def getBestRawNodeToMove(self):
         #print("Best path: ", self.__bestPath)
         #print("Index: ", self.pathIndex)
@@ -603,39 +603,39 @@ class Analyst:
             return self.__bestPath[self.pathIndex]
         else:
             return None
-    
+
     def getBestPosToMove(self):
         bestRawNode = self.getBestRawNodeToMove()
         #print("BEST PATH: ", bestRawNode)
         if bestRawNode is None:
             return None
         node, quadrant = self.grid.rawToProcessedNode(bestRawNode)
-        
+
         nodePos = self.getTilePos(node)
-        
+
         vortexPos = self.getVortexPosInTile(quadrant)
         return [nodePos[0] + vortexPos[0], nodePos[1] + vortexPos[1]]
         #return nodePos
-    
+
     def getBestPoses(self):
         bestPoses = []
         for bestRawNode in self.__bestPath:
             node, quadrant = self.grid.rawToProcessedNode(bestRawNode)
-        
+
             nodePos = self.getTilePos(node)
-        
+
             vortexPos = self.getVortexPosInTile(quadrant)
             #print("Vortex pos: ", vortexPos)
-            #return 
+            #return
             bestPoses.append([nodePos[0] + vortexPos[0], nodePos[1] + vortexPos[1]])
         return bestPoses
 
 
 
-        
+
     def getGrid(self):
         return self.grid.grid
-    
+
     def showGrid(self):
         cv.imshow("Analyst grid", cv.resize(self.grid.getNumpyPrintableArray(), (400, 400), interpolation=cv.INTER_NEAREST))
 

@@ -4,9 +4,9 @@ import numpy as np
 import cv2 as cv
 #REMEMBER TO COPY-PASTE THIS FUNCTIONS ON TO FINAL CODE
 sys.path.append(r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\Participants\\Alejandro")
-from AbstractionLayer import AbstractionLayer
-from StateMachines import StateManager
-timeStep = 16 * 2 
+from AbstractionLayer import AbstractionLayer # li
+from StateMachines import StateManager # li
+timeStep = 16 * 2
 
 
 stMg = StateManager("init")
@@ -20,7 +20,7 @@ while r.doLoop():
     print("rotation: " + str(r.rotation))
     print("position: " + str(r.position))
     print("State:", stMg.state)
-    
+
 
     if not stMg.checkState("init"):
         if r.isEnded():
@@ -31,7 +31,7 @@ while r.doLoop():
     if stMg.checkState("init"):
         if r.calibrate():
             stMg.changeState("followBest")
-    
+
     if stMg.checkState("stop"):
         r.seqMg.startSequence()
         r.seqMoveWheels(0, 0)
@@ -56,7 +56,7 @@ while r.doLoop():
         if r.isTrap:
             r.seqResetSequence()
             stMg.changeState("hole")
-    
+
     if stMg.checkState("hole"):
         r.seqMg.startSequence()
         r.seqMoveWheels(-0.5, -0.5)
@@ -65,10 +65,10 @@ while r.doLoop():
         if r.seqMg.simpleSeqEvent(): r.recalculatePath()
         r.seqResetSequence()
         stMg.changeState("followBest")
-    
+
     if stMg.checkState("end"):
         r.seqMg.startSequence()
         if r.seqMg.simpleSeqEvent(): r.endGame()
         r.seqMoveWheels(0, 0)
-        
+
     print("--------------------------------------------------------------------")

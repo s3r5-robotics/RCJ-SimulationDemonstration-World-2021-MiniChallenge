@@ -4,10 +4,10 @@ import numpy as np
 import cv2 as cv
 #REMEMBER TO COPY-PASTE THIS FUNCTIONS ON TO FINAL CODE
 sys.path.append(r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\Participants\\Alejandro")
-from UtilityFunctions import *
-from StateMachines import *
-from RobotLayer import *
-from Analysis import *
+from UtilityFunctions import * # li
+from StateMachines import * # li
+from RobotLayer import * # li
+from Analysis import * # li
 
 
 class PlottingArray:
@@ -18,31 +18,31 @@ class PlottingArray:
         self.scale = scale
         self.tileSize = tileSize
         self.gridPlottingArray = np.zeros(self.size, np.uint8)
-        
+
         for y in range(0, len(self.gridPlottingArray), int(self.tileSize * scale)):
             for x in range(len(self.gridPlottingArray[0])):
                 self.gridPlottingArray[x][y] = 50
         for x in range(0, len(self.gridPlottingArray), int(self.tileSize * scale)):
             for y in range(len(self.gridPlottingArray[0])):
                 self.gridPlottingArray[x][y] = 50
-        
-    
+
+
     def plotPoint(self, point, value):
         procPoint = [int(point[0] * self.scale), int(point[1] * self.scale * -1)]
         finalx = procPoint[0] + int(self.offsets[0] * self.tileSize)
         finaly = procPoint[1] + int(self.offsets[1] * self.tileSize)
-                
+
         if self.size[0] * -1 < finalx < self.size[0] and self.size[0] * -1 < finaly < self.size[1]:
             self.gridPlottingArray[finalx][finaly] = value
-    
+
     def getPoint(self, point):
         procPoint = [int(point[0] * self.scale), int(point[1] * self.scale * -1)]
         finalx = procPoint[0] + int(self.offsets[0] * self.tileSize)
         finaly = procPoint[1] + int(self.offsets[1] * self.tileSize)
-                
+
         if self.size[0] * -1 < finalx < self.size[0] and self.size[0] * -1 < finaly < self.size[1]:
             return self.gridPlottingArray[finalx][finaly]
-    
+
     def reset(self):
         self.gridPlottingArray = np.zeros(self.size, np.uint8)
 
@@ -94,7 +94,7 @@ class AbstractionLayer():
     def calibrate(self):
         self.seqMg.startSequence()
         self.seqDelaySec(0.1)
-        if self.seqMg.simpleSeqEvent(): 
+        if self.seqMg.simpleSeqEvent():
             actualTile = [self.position[0] // self.tileSize, self.position[1] // self.tileSize]
             """
             self.robot.positionOffsets =  [round((actualTile[0] * self.tileSize) - self.position[0]) + self.tileSize // 2, round((actualTile[1] * self.tileSize) - self.position[1]) + self.tileSize // 2]
@@ -108,29 +108,29 @@ class AbstractionLayer():
         self.seqMoveWheels(0, 0)
         if self.seqMg.simpleSeqEvent(): self.doWallMapping = True
         return self.seqMg.seqResetSequence()
-    
+
     @property
     def rotation(self):
         return self.robot.rotation
-    
+
     @property
     def position(self):
         return self.robot.globalPosition
-    
+
     @property
     def prevPosition(self):
         return self.robot.prevGlobalPosition
 
-    
+
     def getBestPos(self):
         return self.analyst.getBestPosToMove()
-    
+
     def doLoop(self):
         return self.robot.doLoop()
-    
+
     def recalculatePath(self):
         self.analyst.calculatePath = True
-    
+
     def endGame(self):
         self.sendFinalArray()
         self.robot.sendEnd()
@@ -140,7 +140,7 @@ class AbstractionLayer():
 
     def isEnded(self):
         return self.analyst.ended
-    
+
     @property
     def timeLeft(self):
         return self.timeInRound - self.robot.time
@@ -171,14 +171,14 @@ class AbstractionLayer():
             else:
                 self.analyst.stoppedMoving = False
 
-            
+
             """
             for point in pointCloud:
-                
+
                 if self.gridPlotter.getPoint(point) < 250:
                     self.gridPlotter.plotPoint(point, self.gridPlotter.getPoint(point) + 5)
             """
-            
+
         colorPos, self.actualTileType = self.robot.getColorDetection()
         #print("Tile type: ", self.actualTileType)
         self.analyst.loadColorDetection(colorPos, self.actualTileType)
@@ -186,29 +186,28 @@ class AbstractionLayer():
         self.analyst.update(self.position, self.rotation)
 
         self.gridPlotter.reset()
-            
+
         bestPos = self.analyst.getStartRawNodePos()
         if bestPos is not None:
             self.gridPlotter.plotPoint(bestPos, 255)
-            
+
         bestPos = self.analyst.getBestPosToMove()
         if bestPos is not None:
-            self.gridPlotter.plotPoint(bestPos, 200)        
-            
-        
+            self.gridPlotter.plotPoint(bestPos, 200)
+
+
         #self.gridPlotter.plotPoint(self.position, 150)
 
-        
+
         bestPoses = self.analyst.getBestPoses()
         for bestPos in bestPoses:
             self.gridPlotter.plotPoint(bestPos, 255)
-        
-        
+
+
 
         self.analyst.showGrid()
-        
-        
+
+
         cv.imshow("raw detections", cv.resize(self.gridPlotter.gridPlottingArray, (600, 600), interpolation=cv.INTER_NEAREST))
         cv.waitKey(1)
 
-        

@@ -8,7 +8,7 @@ import time
 # v Put files directory here v
 sys.path.append(r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\Participants\\Alejandro")
 # Imports all utility functions
-from UtilityFunctions import *
+from UtilityFunctions import * # li
 
 # Captures images and processes them
 class Camera:
@@ -48,7 +48,7 @@ class Gyroscope:
     def getDiff(self):
         if self.lastRads < 0:
             return self.lastRads * -1
-        
+
         return self.lastRads
 
     # Returns the rotation on degrees
@@ -128,11 +128,11 @@ class ColourSensor:
         self.r = 0
         self.g = 0
         self.b = 0
-    
+
     def getPosition(self, robotGlobalPosition, robotGlobalRotation):
         realPosition = getCoordsFromDegs(robotGlobalRotation, self.distance)
         return [robotGlobalPosition[0] + realPosition[0], robotGlobalPosition[1] + realPosition[1]]
-    
+
     def __update(self):
         colour = self.sensor.getImage()
         #print("Colourimg:", colour)
@@ -140,7 +140,7 @@ class ColourSensor:
         self.g = self.sensor.imageGetGreen(colour, 1, 0, 0)
         self.b = self.sensor.imageGetBlue(colour, 1, 0, 0)
         #print("Colour:", self.r, self.g, self.b)
-    
+
     def __isTrap(self):
         return (35 < self.r < 45 and 35 < self.g < 45)
     def __isSwamp(self):
@@ -155,7 +155,7 @@ class ColourSensor:
         return (135 < self.r < 145 and 55 < self.g < 65 and 215 < self.b < 225)
     def __isRed(self):
         return (245 < self.r < 255 and 55 < self.g < 65 and 55 < self.b < 65)
-    
+
     # Returns the type of tyle detected from the colour data
     def getTileType(self):
         self.__update()
@@ -190,7 +190,7 @@ class Comunicator:
         self.doGetWordInfo = True
         self.gameScore = 0
         self.remainingTime = 0
-    
+
     def sendVictim(self, position, victimtype):
         self.doGetWordInfo = False
         letter = bytes(victimtype, "utf-8")
@@ -198,22 +198,22 @@ class Comunicator:
         position = [int(position[0]), int(position[1])]
         message = struct.pack("i i c", position[0], position[1], letter)
         self.emmiter.send(message)
-        
-    
+
+
     def sendLackOfProgress(self):
         self.doGetWordInfo = False
         message = struct.pack('c', 'L'.encode()) # message = 'L' to activate lack of progress
         self.emmiter.send(message)
-        
-    
+
+
     def sendEndOfPlay(self):
         self.doGetWordInfo = False
         exit_mes = struct.pack('c', b'E')
         self.emmiter.send(exit_mes)
-        
-        
+
+
         print("Ended!!!!!")
-    
+
     def sendMap(self, npArray):
          ## Get shape
         print(npArray)
@@ -232,14 +232,14 @@ class Comunicator:
         map_evaluate_request = struct.pack('c', b'M')
         self.emmiter.send(map_evaluate_request)
         self.doGetWordInfo = False
-    
+
     def requestGameData(self):
         if self.doGetWordInfo:
             message = struct.pack('c', 'G'.encode()) # message = 'G' for game information
             self.emmiter.send(message) # send message
 
     def update(self):
-        
+
         if self.doGetWordInfo:
             """
             self.requestGameData()
@@ -266,8 +266,8 @@ class Comunicator:
                     self.receiver.nextPacket() # Discard the current data packetelse:
         else:
             self.doGetWordInfo = True
-        
-        
+
+
 # Abstraction layer for robot
 class RobotLayer:
     def __init__(self, timeStep):
@@ -294,17 +294,17 @@ class RobotLayer:
         self.gyroscope = Gyroscope(self.robot.getDevice("gyro"), 1, self.timeStep)
         self.accelerometer = Accelerometer(self.robot.getDevice("accelerometer"), [0, 1, 2], self.timeStep)
         self.leftWheel = Wheel(self.robot.getDevice("wheel1 motor"), self.maxWheelSpeed)
-        self.rightWheel = Wheel(self.robot.getDevice("wheel2 motor"), self.maxWheelSpeed) 
+        self.rightWheel = Wheel(self.robot.getDevice("wheel2 motor"), self.maxWheelSpeed)
         self.colorSensor = ColourSensor(self.robot.getDevice("colour_sensor"), 0.037, 32)
         self.comunicator = Comunicator(self.robot.getDevice("emitter"), self.robot.getDevice("receiver"), self.timeStep)
         self.rightCamera = Camera(self.robot.getDevice("camera3"), self.timeStep)
         self.centerCamera = Camera(self.robot.getDevice("camera2"), self.timeStep)
         self.leftCamera = Camera(self.robot.getDevice("camera1"), self.timeStep)
-    
+
     # Sends and array to the controller
     def sendArray(self, array):
         self.comunicator.sendMap(array)
-    
+
     # Sends the end of play to the controller
     def sendEnd(self):
         print("End sended")
@@ -332,7 +332,7 @@ class RobotLayer:
         if self.rotateToDegsFirstTime:
             #print("STARTED ROTATION")
             self.rotateToDegsFirstTime = False
-        self.seqRotateToDegsInitialRot = self.rotation  
+        self.seqRotateToDegsInitialRot = self.rotation
         self.seqRotateToDegsinitialDiff = round(self.seqRotateToDegsInitialRot - degs)
         diff = self.rotation - degs
         moveDiff = max(round(self.rotation), degs) - min(self.rotation, degs)
@@ -370,10 +370,10 @@ class RobotLayer:
 
         #print("ROT IS FALSE")
         return False
-    
+
     # Rotates to the inputted degrees smoothly
     def rotateSmoothlyToDegs(self, degs, orientation="closest", maxSpeed=0.5):
-        accuracy = 2 
+        accuracy = 2
         seqRotateToDegsinitialDiff = round(self.rotation  - degs)
         diff = self.rotation - degs
         moveDiff = max(round(self.rotation), degs) - min(self.rotation, degs)
@@ -436,23 +436,23 @@ class RobotLayer:
                 self.moveWheels(ratio, ratio)
                 #print("Moving")
         return False
-    
+
     # Returns the position and tile type detected by the colour sensor
     def getColorDetection(self):
         pos = self.colorSensor.getPosition(self.globalPosition, self.rotation)
         detection = self.colorSensor.getTileType()
         return pos, detection
-    
+
     # Returns True if the simulation is running
     def doLoop(self):
         return self.robot.step(self.timeStep) != -1
-    
+
     # Returns if the wheels are generally moving forward or backwards
     def getWheelDirection(self):
         if self.rightWheel.velocity + self.leftWheel.velocity == 0:
             return 0
         return (self.rightWheel.velocity + self.leftWheel.velocity) / 2
-    
+
     # Must run every TimeStep
     def update(self):
         # Updates the current time
@@ -465,7 +465,7 @@ class RobotLayer:
         self.prevGlobalPosition = self.globalPosition
         # Gets global position and applies offsets
         self.globalPosition = self.accelerometer.getPos()
-        
+
         #print("Acc position:", str())
 
         self.globalPosition[0] += self.positionOffsets[0]
