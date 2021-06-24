@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 
-const PATHING_REGEX = /sys\.path\.append\((.*)\)/gm;
+const PATHING_REGEX = /sys\.path\.append\((\n|)(.*)\)/gm;
 
 const srcDir = new URL('../src/', import.meta.url);
 const srcPath = fileURLToPath(srcDir);
