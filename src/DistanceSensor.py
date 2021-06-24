@@ -28,7 +28,7 @@ class WallFilter():
         return listOfMasks
 
     def showWallFilterImgResult(self):
-        listOfMasks = self.showWallFilterImgResult()
+        listOfMasks = self.showWallFilterMask()
         listOfImgResult = []
         for image in self.cameraImage:
             imgResult = cv.bitwise_and(image, image, mask= listOfMasks[image])
