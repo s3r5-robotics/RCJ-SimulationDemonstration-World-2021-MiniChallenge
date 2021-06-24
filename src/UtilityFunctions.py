@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 
 # Corrects the given angle in degrees to be in a range from 0 to 360
@@ -97,3 +98,9 @@ def divideLists(list1, list2):
     for item1, item2 in zip(list1, list2):
         finalList.append(item1 / item2)
     return finalList
+
+def imageSetUp(camera):
+    imageResult = camera.getImage()
+    imageResult = np.frombuffer(imageResult, np.uint8).reshape((camera.getHeight(), camera.getWidth(), 4))
+    imageResult = np.array(imageResult ,dtype=np.uint8)
+    return imageResult
