@@ -2,16 +2,17 @@ from controller import Robot
 import sys
 import numpy as np
 import cv2 as cv
-#REMEMBER TO COPY-PASTE THIS FUNCTIONS ON TO FINAL CODE
-sys.path.append(r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\Participants\\Alejandro")
-from AbstractionLayer import AbstractionLayer # li
-from StateMachines import StateManager # li
-timeStep = 16 * 2
 
+# REMEMBER TO COPY-PASTE THIS FUNCTIONS ON TO FINAL CODE
+sys.path.append(
+    r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\Participants\\Alejandro")
+from AbstractionLayer import AbstractionLayer  # li
+from StateMachines import StateManager  # li
+
+timeStep = 16 * 2
 
 stMg = StateManager("init")
 r = AbstractionLayer()
-
 
 # While the simulation is running
 while r.doLoop():
@@ -21,12 +22,10 @@ while r.doLoop():
     print("position: " + str(r.position))
     print("State:", stMg.state)
 
-
     if not stMg.checkState("init"):
         if r.isEnded():
             r.seqResetSequence()
             stMg.changeState("end")
-
 
     if stMg.checkState("init"):
         if r.calibrate():

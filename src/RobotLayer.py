@@ -4,11 +4,13 @@ import numpy as np
 import struct
 import time
 
-#REMEMBER TO COPY-PASTE THIS FUNCTIONS ON TO FINAL CODE
+# REMEMBER TO COPY-PASTE THIS FUNCTIONS ON TO FINAL CODE
 # v Put files directory here v
-sys.path.append(r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\Participants\\Alejandro")
+sys.path.append(
+    r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\Participants\\Alejandro")
 # Imports all utility functions
-from UtilityFunctions import * # li
+from UtilityFunctions import *  # li
+
 
 # Captures images and processes them
 class Camera:
@@ -36,7 +38,7 @@ class Gyroscope:
 
     # Do on every timestep
     def update(self, time):
-        #print("Gyro Vals: " + str(self.sensor.getValues()))
+        # print("Gyro Vals: " + str(self.sensor.getValues()))
         timeElapsed = time - self.oldTime  # Time passed in time step
         radsInTimestep = (self.sensor.getValues())[self.index] * timeElapsed
         self.lastRads = radsInTimestep
@@ -67,6 +69,7 @@ class Gyroscope:
     def setDegrees(self, degs):
         self.rotation = degsToRads(degs)
 
+
 # Tracks global rotation
 class Accelerometer:
     def __init__(self, accelerometer, indexes, timeStep):
@@ -84,8 +87,10 @@ class Accelerometer:
         accValues = substractLists(self.sensor.getValues(), [0, 9.81, 0])
         accValues = multiplyLists(accValues, [timeElapsed, timeElapsed, timeElapsed])
         self.speedInTimeStep = sumLists(accValues, self.speedInTimeStep)
-        print("Acc values:" + str([roundDecimal(self.speedInTimeStep[0], 10000), roundDecimal(self.speedInTimeStep[2], 10000)]))
-        posInTimeStep = multiplyLists(self.speedInTimeStep, [timeElapsed, timeElapsed, timeElapsed])#[timeElapsed ** 2, timeElapsed ** 2, timeElapsed ** 2])
+        print("Acc values:" + str(
+            [roundDecimal(self.speedInTimeStep[0], 10000), roundDecimal(self.speedInTimeStep[2], 10000)]))
+        posInTimeStep = multiplyLists(self.speedInTimeStep, [timeElapsed, timeElapsed,
+                                                             timeElapsed])  # [timeElapsed ** 2, timeElapsed ** 2, timeElapsed ** 2])
         self.lastPos = []
         for i in posInTimeStep:
             self.lastPos.append(roundDecimal(i, 1000))
@@ -119,6 +124,7 @@ class Wheel:
         self.velocity = ratio * self.maxVelocity
         self.wheel.setVelocity(self.velocity)
 
+
 # Reads the colour sensor
 class ColourSensor:
     def __init__(self, sensor, distancefromCenter, timeStep):
@@ -135,24 +141,30 @@ class ColourSensor:
 
     def __update(self):
         colour = self.sensor.getImage()
-        #print("Colourimg:", colour)
+        # print("Colourimg:", colour)
         self.r = self.sensor.imageGetRed(colour, 1, 0, 0)
         self.g = self.sensor.imageGetGreen(colour, 1, 0, 0)
         self.b = self.sensor.imageGetBlue(colour, 1, 0, 0)
-        #print("Colour:", self.r, self.g, self.b)
+        # print("Colour:", self.r, self.g, self.b)
 
     def __isTrap(self):
         return (35 < self.r < 45 and 35 < self.g < 45)
+
     def __isSwamp(self):
         return (200 < self.r < 210 and 165 < self.g < 175 and 95 < self.b < 105)
+
     def __isCheckpoint(self):
         return (self.r > 232 and self.g > 232 and self.b > 232)
+
     def __isNormal(self):
         return self.r == 227 and self.g == 227
+
     def __isBlue(self):
         return (55 < self.r < 65 and 55 < self.g < 65 and 245 < self.b < 255)
+
     def __isPurple(self):
         return (135 < self.r < 145 and 55 < self.g < 65 and 215 < self.b < 225)
+
     def __isRed(self):
         return (245 < self.r < 255 and 55 < self.g < 65 and 55 < self.b < 65)
 
@@ -175,8 +187,8 @@ class ColourSensor:
         elif self.__isRed():
             tileType = "connection1-3"
 
-        #print("Color: " + tileType)
-        #print("r: " + str(self.r) + "g: " + str(self.g) + "b: " +  str(self.b))
+        # print("Color: " + tileType)
+        # print("r: " + str(self.r) + "g: " + str(self.g) + "b: " +  str(self.b))
         return tileType
 
 
@@ -199,27 +211,24 @@ class Comunicator:
         message = struct.pack("i i c", position[0], position[1], letter)
         self.emmiter.send(message)
 
-
     def sendLackOfProgress(self):
         self.doGetWordInfo = False
-        message = struct.pack('c', 'L'.encode()) # message = 'L' to activate lack of progress
+        message = struct.pack('c', 'L'.encode())  # message = 'L' to activate lack of progress
         self.emmiter.send(message)
-
 
     def sendEndOfPlay(self):
         self.doGetWordInfo = False
         exit_mes = struct.pack('c', b'E')
         self.emmiter.send(exit_mes)
 
-
         print("Ended!!!!!")
 
     def sendMap(self, npArray):
-         ## Get shape
+        ## Get shape
         print(npArray)
         s = npArray.shape
         ## Get shape as bytes
-        s_bytes = struct.pack('2i',*s)
+        s_bytes = struct.pack('2i', *s)
         ## Flattening the matrix and join with ','
         flatMap = ','.join(npArray.flatten())
         ## Encode
@@ -228,15 +237,15 @@ class Comunicator:
         a_bytes = s_bytes + sub_bytes
         ## Send map data
         self.emmiter.send(a_bytes)
-        #STEP3 Send map evaluate request
+        # STEP3 Send map evaluate request
         map_evaluate_request = struct.pack('c', b'M')
         self.emmiter.send(map_evaluate_request)
         self.doGetWordInfo = False
 
     def requestGameData(self):
         if self.doGetWordInfo:
-            message = struct.pack('c', 'G'.encode()) # message = 'G' for game information
-            self.emmiter.send(message) # send message
+            message = struct.pack('c', 'G'.encode())  # message = 'G' for game information
+            self.emmiter.send(message)  # send message
 
     def update(self):
 
@@ -253,17 +262,17 @@ class Comunicator:
                         self.receiver.nextPacket() # Discard the current data packet
             """
 
-            #print("Remaining time:", self.remainingTime)
+            # print("Remaining time:", self.remainingTime)
             self.lackOfProgress = False
-            if self.receiver.getQueueLength() > 0: # If receiver queue is not empty
+            if self.receiver.getQueueLength() > 0:  # If receiver queue is not empty
                 receivedData = self.receiver.getData()
                 print(receivedData)
                 if len(receivedData) < 2:
-                    tup = struct.unpack('c', receivedData) # Parse data into character
-                    if tup[0].decode("utf-8") == 'L': # 'L' means lack of progress occurred
+                    tup = struct.unpack('c', receivedData)  # Parse data into character
+                    if tup[0].decode("utf-8") == 'L':  # 'L' means lack of progress occurred
                         print("Detected Lack of Progress!")
                         self.lackOfProgress = True
-                    self.receiver.nextPacket() # Discard the current data packetelse:
+                    self.receiver.nextPacket()  # Discard the current data packetelse:
         else:
             self.doGetWordInfo = True
 
@@ -330,7 +339,7 @@ class RobotLayer:
     def rotateToDegs(self, degs, orientation="closest", maxSpeed=0.5):
         accuracy = 2
         if self.rotateToDegsFirstTime:
-            #print("STARTED ROTATION")
+            # print("STARTED ROTATION")
             self.rotateToDegsFirstTime = False
         self.seqRotateToDegsInitialRot = self.rotation
         self.seqRotateToDegsinitialDiff = round(self.seqRotateToDegsInitialRot - degs)
@@ -339,7 +348,7 @@ class RobotLayer:
         if diff > 180 or diff < -180:
             moveDiff = 360 - moveDiff
         speedFract = min(mapVals(moveDiff, accuracy, 90, 0.2, 0.8), maxSpeed)
-        if accuracy  * -1 < diff < accuracy or 360 - accuracy < diff < 360 + accuracy:
+        if accuracy * -1 < diff < accuracy or 360 - accuracy < diff < 360 + accuracy:
             self.rotateToDegsFirstTime = True
             return True
         else:
@@ -360,27 +369,27 @@ class RobotLayer:
                 self.moveWheels(speedFract * -1, speedFract)
             elif direction == "left":
                 self.moveWheels(speedFract, speedFract * -1)
-            #print("speed fract: " +  str(speedFract))
-            #print("target angle: " +  str(degs))
-            #print("moveDiff: " + str(moveDiff))
-            #print("diff: " + str(diff))
-            #print("orientation: " + str(orientation))
-            #print("direction: " + str(direction))
-            #print("initialDiff: " + str(self.seqRotateToDegsinitialDiff))
+            # print("speed fract: " +  str(speedFract))
+            # print("target angle: " +  str(degs))
+            # print("moveDiff: " + str(moveDiff))
+            # print("diff: " + str(diff))
+            # print("orientation: " + str(orientation))
+            # print("direction: " + str(direction))
+            # print("initialDiff: " + str(self.seqRotateToDegsinitialDiff))
 
-        #print("ROT IS FALSE")
+        # print("ROT IS FALSE")
         return False
 
     # Rotates to the inputted degrees smoothly
     def rotateSmoothlyToDegs(self, degs, orientation="closest", maxSpeed=0.5):
         accuracy = 2
-        seqRotateToDegsinitialDiff = round(self.rotation  - degs)
+        seqRotateToDegsinitialDiff = round(self.rotation - degs)
         diff = self.rotation - degs
         moveDiff = max(round(self.rotation), degs) - min(self.rotation, degs)
         if diff > 180 or diff < -180:
             moveDiff = 360 - moveDiff
         speedFract = min(mapVals(moveDiff, accuracy, 90, 0.2, 0.8), maxSpeed)
-        if accuracy  * -1 < diff < accuracy or 360 - accuracy < diff < 360 + accuracy:
+        if accuracy * -1 < diff < accuracy or 360 - accuracy < diff < 360 + accuracy:
             self.rotateToDegsFirstTime = True
             return True
         else:
@@ -400,15 +409,15 @@ class RobotLayer:
                 self.moveWheels(speedFract * -0.5, speedFract)
             elif direction == "left":
                 self.moveWheels(speedFract, speedFract * -0.5)
-            #print("speed fract: " +  str(speedFract))
-            #print("target angle: " +  str(degs))
-            #print("moveDiff: " + str(moveDiff))
-            #print("diff: " + str(diff))
-            #print("orientation: " + str(orientation))
-            #print("direction: " + str(direction))
-            #print("initialDiff: " + str(seqRotateToDegsinitialDiff))
+            # print("speed fract: " +  str(speedFract))
+            # print("target angle: " +  str(degs))
+            # print("moveDiff: " + str(moveDiff))
+            # print("diff: " + str(diff))
+            # print("orientation: " + str(orientation))
+            # print("direction: " + str(direction))
+            # print("initialDiff: " + str(seqRotateToDegsinitialDiff))
 
-        #print("ROT IS FALSE")
+        # print("ROT IS FALSE")
         return False
 
     # Moves to the inputted coordinates
@@ -417,24 +426,24 @@ class RobotLayer:
         descelerationStart = 0.5 * 0.12
         diffX = targetPos[0] - self.globalPosition[0]
         diffY = targetPos[1] - self.globalPosition[1]
-        #print("Target Pos: ", targetPos)
-        #print("Used global Pos: ", self.globalPosition)
-        #print("diff in pos: " + str(diffX) + " , " + str(diffY))
+        # print("Target Pos: ", targetPos)
+        # print("Used global Pos: ", self.globalPosition)
+        # print("diff in pos: " + str(diffX) + " , " + str(diffY))
         dist = getDistance((diffX, diffY))
-        #print("Dist: "+ str(dist))
+        # print("Dist: "+ str(dist))
         if errorMargin * -1 < dist < errorMargin:
-            #self.robot.move(0,0)
-            #print("FinisehedMove")
+            # self.robot.move(0,0)
+            # print("FinisehedMove")
             return True
         else:
             ang = getDegsFromCoords((diffX, diffY))
             ang = normalizeDegs(ang)
-            #print("traget ang: " + str(ang))
+            # print("traget ang: " + str(ang))
             ratio = min(mapVals(dist, 0, descelerationStart, 0.1, 1), 1)
             ratio = max(ratio, 0.8)
             if self.rotateToDegs(ang):
                 self.moveWheels(ratio, ratio)
-                #print("Moving")
+                # print("Moving")
         return False
 
     # Returns the position and tile type detected by the colour sensor
@@ -466,7 +475,7 @@ class RobotLayer:
         # Gets global position and applies offsets
         self.globalPosition = self.accelerometer.getPos()
 
-        #print("Acc position:", str())
+        # print("Acc position:", str())
 
         self.globalPosition[0] += self.positionOffsets[0]
         self.globalPosition[1] += self.positionOffsets[1]
@@ -477,9 +486,7 @@ class RobotLayer:
         # Gets global rotation
         self.rotation = self.gyroscope.getDegrees()
 
-
         # Updates emmiter and reciever
         self.comunicator.update()
 
         time.sleep(0.1)
-

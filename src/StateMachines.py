@@ -12,6 +12,7 @@ class StateManager:
     def checkState(self, state):
         return self.state == state
 
+
 # Makes it possible to run arbitrary code sequentially without interrupting other code that must run continuoulsy
 class SequenceManager:
     def __init__(self):
@@ -29,7 +30,7 @@ class SequenceManager:
     def seqResetSequence(self):
         if self.check():
             self.resetSequence()
-            
+
             return True
         return False
 
@@ -70,7 +71,7 @@ class SequenceManager:
                 self.nextSeq()
                 return True
         return False
-    
+
     # When inpuuted any function it returns a sequential version of it that can be used in a sequence
     def makeSimpleSeqEvent(self, function):
         def event(*args, **kwargs):
@@ -79,6 +80,7 @@ class SequenceManager:
                 self.nextSeq()
                 return True
             return False
+
         return event
 
     # When inputted a function that returns True when it ends returns a sequential version of it that can be used in a sequence
@@ -89,4 +91,5 @@ class SequenceManager:
                     self.nextSeq()
                     return True
             return False
+
         return event
