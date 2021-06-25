@@ -4,23 +4,28 @@ import sys
 
 
 sys.path.append(
-    r"C:\Users\Maxi\Documents\program_robots\arg-slovenia\src")
+    r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\src")
 from UtilityFunctions import *  # li
 
 class WallFilter():
     def __init__(self):
-        self.hue_min = 0
-        self.hue_max = 40
-        self.saturation_min = 11
+        self.hue_min = 50
+        self.hue_max = 100
+        
+        self.saturation_min = 0
         self.saturation_max = 255
+
         self.min_value = 0
-        self.max_value = 22
+        self.max_value = 255
         self.lower = np.array([self.hue_min, self.saturation_min, self.min_value])
         self.upper = np.array([self.hue_max, self.saturation_max, self.max_value])
 
     def showWallFilterMask(self, cameraImage):
         hsv_image = cv.cvtColor(cameraImage, cv.COLOR_BGRA2BGR)
+        hsv_image = cv.cvtColor(hsv_image, cv.COLOR_BGR2HSV)
+
         mask = cv.inRange(hsv_image, self.lower, self.upper)
+        cv.imshow("Mask", mask)
         return mask
 
     def showWallFilterImgResult(self, cameraImage):
@@ -47,5 +52,5 @@ class DistanceSensor():
         pixels_height_base = 52
         if pixels_height != 0:
             distance = ( pixels_height_base * distanceBase)/ pixels_height
-            print(f"distanceCamera Normal--> {distance}\t distanceCamera Mapped--> {mapVals(distance, 0, 80, 0, 32)}")
-        else: pass
+            return mapVals(distance, 0, 80, 0, 0.32)
+        else: return None

@@ -5,7 +5,7 @@ import cv2 as cv
 
 # REMEMBER TO COPY-PASTE THIS FUNCTIONS ON TO FINAL CODE
 sys.path.append(
-    r"C:\Users\Maxi\Documents\program_robots\arg-slovenia\src")
+    r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\src")
 from UtilityFunctions import *  # li
 from StateMachines import *  # li
 from RobotLayer import *  # li
@@ -144,6 +144,13 @@ class AbstractionLayer():
     def timeLeft(self):
         return self.timeInRound - self.robot.time
 
+    def isStraight(self, limit):
+        for ang in (0, 360, 90, 270, 180):
+            diff = max(ang, self.rotation) - min(ang, self.rotation)
+            if diff <= limit:
+                return True
+        return False
+
     def update(self):
         self.robot.update()
 
@@ -182,6 +189,9 @@ class AbstractionLayer():
         #self.analyst.loadColorDetection(colorPos, self.actualTileType)
         #self.isTrap = self.actualTileType == "hole"
         self.analyst.update(self.position, self.rotation)
+        
+        if self.isStraight(20):
+            self.analyst.loadDistanceDetection(self.robot.getDistanceToWall())
 
         self.gridPlotter.reset()
 

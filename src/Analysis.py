@@ -4,7 +4,7 @@ import sys
 import copy
 
 sys.path.append(
-    r"C:\Users\Maxi\Documents\program_robots\arg-slovenia\src")
+    r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\src")
 from UtilityFunctions import *  # li
 
 
@@ -52,9 +52,7 @@ class WallNode:
             self.__occupied = False
 
     def getString(self):
-        if len(self.fixtures):
-            returnString = "".join(self.fixtures)
-        elif self.occupied:
+        if self.occupied:
             returnString = "1"
         else:
             returnString = "0"
@@ -214,14 +212,73 @@ class Grid:
     def setNode(self, position, value, side=[0, 0]):
         self.setRawNode(self.processedToRawNode(position, side), value)
 
+    def quadrupleTile(self, rawNodePosition):
+        quad = []
+        tileType = self.getRawNode(rawNodePosition).getString()
+        for adj in ((0, -1), (-1, 0)):
+            isOccupied = self.getRawNode(sumLists(adj, rawNodePosition)).occupied
+            if adj == (0, -1):
+                side = isOccupied
+            elif adj == (-1, 0):
+                top = isOccupied
+        
+        if top and side:
+            quad = [["1", "1", "1", "1"],
+                    ["1", tileType, "0", tileType],
+                    ["1", "0", "0", "0"],
+                    ["1", tileType, "0", tileType]]
+        
+        elif top:
+            quad = [["1", "1", "1", "1"],
+                    ["0", tileType, "0", tileType],
+                    ["0", "0", "0", "0"],
+                    ["0", tileType, "0", tileType]]
+        
+        elif side:
+            quad = [["1", "0", "0", "0"],
+                    ["1", tileType, "0", tileType],
+                    ["1", "0", "0", "0"],
+                    ["1", tileType, "0", tileType]]
+        
+        else:
+            quad = [["0", "0", "0", "0"],
+                    ["0", tileType, "0", tileType],
+                    ["0", "0", "0", "0"],
+                    ["0", tileType, "0", tileType]]
+        
+        return quad
+
+        
+
+
+
     def getArrayRepresentation(self):
         grid = []
-        for y in self.grid:
+        for y in range(len(self.grid)):
             row = []
-            for node in y:
-                row.append(node.getString())
-            grid.append(row)
-        return np.array(grid)
+            for x in range(len(self.grid[y])):
+                node = [x - self.offsets[0], y - self.offsets[1]]
+                if isinstance(self.getRawNode(node), TileNode):
+                    
+                    if len(row):
+                        row = np.vstack((row, np.array(self.quadrupleTile(node))))
+                    else:
+                        row = np.array(self.quadrupleTile(node))
+
+            print("Row Lenght:", len(row))
+            print(row)
+            if len(row):
+                if len(grid):
+                    grid = np.hstack((grid, row))
+                else:
+                    grid = row
+            print("Grid lenght:", len(grid))
+
+        
+        #with open(r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\src\\finalGrid.txt", "w") as file:
+            #file.write(str(np.ndarray.tolist(grid)))
+
+        return grid
 
     def getNumpyPrintableArray(self):
         printableArray = np.zeros(self.size, np.uint8)
@@ -484,7 +541,7 @@ class Analyst:
         self.calculatePath = True
         self.stoppedMoving = False
         self.pathIndex = 0
-        self.positionReachedThresh = 0.04
+        self.positionReachedThresh = 0.01
         self.prevRawNode = [0, 0]
         self.ended = False
 
@@ -555,6 +612,33 @@ class Analyst:
     def getArrayRepresentation(self):
         return self.grid.getArrayRepresentation()
 
+    def loadDistanceDetection(self, distance):
+        print("Camera distance:", distance)
+        if distance is not None:
+            """
+            if self.tileSize * 0.9 < distance < self.tileSize * 1:
+                print("Should put wall")
+                dir = multiplyLists(self.direction, [3, 3])
+                facingWall = sumLists(self.startRawNode, dir)
+                self.grid.getRawNode(facingWall).occupied = True
+                #self.calculatePath = True
+            """
+            if distance < 0.10:
+                print("Should put wall")
+                dir = multiplyLists(self.direction, [1, 1])
+                facingWall = sumLists(self.startRawNode, dir)
+                for adj in ((0, 1), (0, -1), (1, 0), (-1, 0)):
+                    adjacent = self.grid.getRawNode(sumLists(facingWall, adj))
+                    if isinstance(adjacent, VortexNode):
+                        adjacent.occupied = True
+                        print("VORTEX!")
+                    else:
+                        print("NO VORTEX!")
+
+                self.grid.getRawNode(facingWall).occupied = True
+                self.calculatePath = True
+
+
     def update(self, position, rotation):
         self.direction = self.getQuadrantFromDegs(rotation)
 
@@ -603,8 +687,8 @@ class Analyst:
             self.calculatePath = False
 
     def getBestRawNodeToMove(self):
-        # print("Best path: ", self.__bestPath)
-        # print("Index: ", self.pathIndex)
+        print("Best path: ", self.__bestPath)
+        print("Index: ", self.pathIndex)
         if len(self.__bestPath):
             return self.__bestPath[self.pathIndex]
         else:
