@@ -4,12 +4,11 @@ import sys
 
 
 sys.path.append(
-    r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\src")
+    r"C:\Users\Maxi\Documents\program_robots\arg-slovenia\src")
 from UtilityFunctions import *  # li
 
 class WallFilter():
-    def __init__(self, cameraImage):
-        self.cameraImage = cameraImage
+    def __init__(self):
         self.hue_min = 0
         self.hue_max = 40
         self.saturation_min = 11
@@ -19,28 +18,20 @@ class WallFilter():
         self.lower = np.array([self.hue_min, self.saturation_min, self.min_value])
         self.upper = np.array([self.hue_max, self.saturation_max, self.max_value])
 
-    def showWallFilterMask(self):
-        listOfMasks = []
-        for image in self.cameraImage:
-            hsv_image = cv.cvtColor(image, cv.COLOR_BGRA2BGR)
-            mask = cv.inRange(hsv_image, self.lower, self.upper)
-            listOfMasks.append(mask)
-        return listOfMasks
+    def showWallFilterMask(self, cameraImage):
+        hsv_image = cv.cvtColor(cameraImage, cv.COLOR_BGRA2BGR)
+        mask = cv.inRange(hsv_image, self.lower, self.upper)
+        return mask
 
-    def showWallFilterImgResult(self):
-        listOfMasks = self.showWallFilterMask()
-        listOfImgResult = []
-        for image in self.cameraImage:
-            imgResult = cv.bitwise_and(image, image, mask= listOfMasks[image])
-            listOfImgResult.append(imgResult)
-        return listOfImgResult
+    def showWallFilterImgResult(self, cameraImage):
+        imgResult = cv.bitwise_and(cameraImage, cameraImage, mask= self.showWallFilterMask(cameraImage))
+        return imgResult
 
 class DistanceSensor():
-    def __init__(self, camera1, camera2, camera3):
-        self.camera1 = camera1
-        self.camera2 = camera2
-        self.camera3 = camera3
-        self.filters = WallFilter([self.camera1, self.camera2, self.camera3])
+    def __init__(self):
+        self.filters = WallFilter()
+
+    
 
     def __distanceMeasuring(self, binaryImage):
         counter = 0
@@ -49,12 +40,12 @@ class DistanceSensor():
                 counter += 1
         return counter
 
-    def distanceCalculation(self):
-        filters = self.filters.showWallFilterMask()
-        pixels_height = self.__distanceMeasuring(filters[0]) #ToDo: can improve
+    def distanceCalculation(self, cameraImage):
+        filters = self.filters.showWallFilterMask(cameraImage)
+        pixels_height = self.__distanceMeasuring(filters) #ToDo: can improve
         distanceBase = 37.11126
         pixels_height_base = 52
         if pixels_height != 0:
             distance = ( pixels_height_base * distanceBase)/ pixels_height
-            print(f"distanceCamera --> {distance}")
+            print(f"distanceCamera Normal--> {distance}\t distanceCamera Mapped--> {mapVals(distance, 0, 80, 0, 32)}")
         else: pass

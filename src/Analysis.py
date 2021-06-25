@@ -4,7 +4,7 @@ import sys
 import copy
 
 sys.path.append(
-    r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\src")
+    r"C:\Users\Maxi\Documents\program_robots\arg-slovenia\src")
 from UtilityFunctions import *  # li
 
 
