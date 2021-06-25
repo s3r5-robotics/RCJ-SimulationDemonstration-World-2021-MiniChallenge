@@ -7,6 +7,7 @@ import time
 import cv2 as cv
 import copy
 
+# File: "UtilityFunctions.py"
 
 
 
@@ -113,6 +114,7 @@ def imageSetUp(camera):
     imageResult = np.frombuffer(imageResult, np.uint8).reshape((camera.getHeight(), camera.getWidth(), 4))
     imageResult = np.array(imageResult ,dtype=np.uint8)
     return imageResult
+# File: "StateMachines.py"
 # Manages states
 class StateManager:
     def __init__(self, initialState):
@@ -208,14 +210,14 @@ class SequenceManager:
             return False
 
         return event
+# File: "RobotLayer.py"
 
 
 
 
 
 
-# REMEMBER TO COPY-PASTE THIS FUNCTIONS ON TO FINAL CODE
-# v Put files directory here v
+
 
 # Imports all utility functions
 
@@ -710,10 +712,10 @@ class RobotLayer:
         if self.rightWheel.getLinearVelocity() + self.leftWheel.getLinearVelocity() == 0:
             return 0
         return (self.rightWheel.getLinearVelocity() + self.leftWheel.getLinearVelocity()) / 2
-    
+
     def getDistanceToWall(self):
         return self.centerCamera.getDistance()
-        
+
     # Must run every TimeStep
     def update(self):
         # Updates the current time
@@ -745,13 +747,13 @@ class RobotLayer:
         self.comunicator.update()
 
         #time.sleep(0.1)
-        
+
+# File: "AbstractionLayer.py"
 
 
 
 
 
-# REMEMBER TO COPY-PASTE THIS FUNCTIONS ON TO FINAL CODE
 
 
 
@@ -936,7 +938,7 @@ class AbstractionLayer():
         #self.analyst.loadColorDetection(colorPos, self.actualTileType)
         #self.isTrap = self.actualTileType == "hole"
         self.analyst.update(self.position, self.rotation)
-        
+
         if self.isStraight(20):
             self.analyst.loadDistanceDetection(self.robot.getDistanceToWall())
 
@@ -964,6 +966,7 @@ class AbstractionLayer():
         cv.imshow("raw detections",
                   cv.resize(self.gridPlotter.gridPlottingArray, (600, 600), interpolation=cv.INTER_NEAREST))
         cv.waitKey(1)
+# File: "DistanceSensor.py"
 
 
 
@@ -1019,6 +1022,7 @@ class DistanceSensor():
             distance = ( pixels_height_base * distanceBase)/ pixels_height
             return mapVals(distance, 0, 80, 0, 0.32)
         else: return None
+# File: "Analysis.py"
 
 
 
@@ -1746,12 +1750,13 @@ class Analyst:
     def showGrid(self):
         cv.imshow("Analyst grid",
                   cv.resize(self.grid.getNumpyPrintableArray(), (400, 400), interpolation=cv.INTER_NEAREST))
+# File: "FinalCode.py"
 
 
 
 
 
-# REMEMBER TO COPY-PASTE THIS FUNCTIONS ON TO FINAL CODE
+
 
 
 

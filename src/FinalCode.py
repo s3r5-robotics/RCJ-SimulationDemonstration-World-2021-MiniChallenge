@@ -3,7 +3,7 @@ import sys
 import numpy as np
 import cv2 as cv
 
-# REMEMBER TO COPY-PASTE THIS FUNCTIONS ON TO FINAL CODE
+
 sys.path.append(
     r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\src")
 from AbstractionLayer import AbstractionLayer  # li

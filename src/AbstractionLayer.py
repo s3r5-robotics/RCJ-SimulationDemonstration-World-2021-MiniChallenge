@@ -3,7 +3,6 @@ import sys
 import numpy as np
 import cv2 as cv
 
-# REMEMBER TO COPY-PASTE THIS FUNCTIONS ON TO FINAL CODE
 sys.path.append(
     r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\src")
 from UtilityFunctions import *  # li
@@ -189,7 +188,7 @@ class AbstractionLayer():
         #self.analyst.loadColorDetection(colorPos, self.actualTileType)
         #self.isTrap = self.actualTileType == "hole"
         self.analyst.update(self.position, self.rotation)
-        
+
         if self.isStraight(20):
             self.analyst.loadDistanceDetection(self.robot.getDistanceToWall())
 

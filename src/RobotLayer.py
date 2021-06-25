@@ -4,8 +4,7 @@ import numpy as np
 import struct
 import time
 
-# REMEMBER TO COPY-PASTE THIS FUNCTIONS ON TO FINAL CODE
-# v Put files directory here v
+
 sys.path.append(
     r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\src")
 # Imports all utility functions
@@ -501,10 +500,10 @@ class RobotLayer:
         if self.rightWheel.getLinearVelocity() + self.leftWheel.getLinearVelocity() == 0:
             return 0
         return (self.rightWheel.getLinearVelocity() + self.leftWheel.getLinearVelocity()) / 2
-    
+
     def getDistanceToWall(self):
         return self.centerCamera.getDistance()
-        
+
     # Must run every TimeStep
     def update(self):
         # Updates the current time
@@ -536,4 +535,4 @@ class RobotLayer:
         self.comunicator.update()
 
         #time.sleep(0.1)
-        
+
