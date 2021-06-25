@@ -4,7 +4,7 @@ import sys
 
 
 sys.path.append(
-    r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\Participants\\Alejandro")
+    r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\src")
 from UtilityFunctions import *  # li
 
 class WallFilter():
