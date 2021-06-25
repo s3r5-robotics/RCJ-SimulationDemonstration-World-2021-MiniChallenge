@@ -26,7 +26,7 @@ class TileNode:
 
     @tileType.setter
     def tileType(self, value):
-        if self.__tileType in ("normal", "undefined") or value in ("start",):
+        if self.__tileType not in ("start", "hole") or value in ("start",):
             self.__tileType = value
 
     def getString(self):

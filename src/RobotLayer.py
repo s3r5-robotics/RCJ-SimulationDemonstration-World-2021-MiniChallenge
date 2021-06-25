@@ -158,7 +158,7 @@ class ColourSensor:
         self.r = self.sensor.imageGetRed(colour, 1, 0, 0)
         self.g = self.sensor.imageGetGreen(colour, 1, 0, 0)
         self.b = self.sensor.imageGetBlue(colour, 1, 0, 0)
-        # print("Colour:", self.r, self.g, self.b)
+        print("Colour:", self.r, self.g, self.b)
 
     def __isTrap(self):
         return (35 < self.r < 45 and 35 < self.g < 45)
@@ -167,7 +167,7 @@ class ColourSensor:
         return (200 < self.r < 210 and 165 < self.g < 175 and 95 < self.b < 105)
 
     def __isCheckpoint(self):
-        return (self.r > 232 and self.g > 232 and self.b > 232)
+        return (self.r > 250 and self.g > 250 and self.b > 250)
 
     def __isNormal(self):
         return self.r == 227 and self.g == 227
@@ -189,16 +189,8 @@ class ColourSensor:
             tileType = "normal"
         elif self.__isTrap():
             tileType = "hole"
-        elif self.__isSwamp():
-            tileType = "swamp"
         elif self.__isCheckpoint():
             tileType = "checkpoint"
-        elif self.__isBlue():
-            tileType = "connection1-2"
-        elif self.__isPurple():
-            tileType = "connection2-3"
-        elif self.__isRed():
-            tileType = "connection1-3"
 
         # print("Color: " + tileType)
         # print("r: " + str(self.r) + "g: " + str(self.g) + "b: " +  str(self.b))

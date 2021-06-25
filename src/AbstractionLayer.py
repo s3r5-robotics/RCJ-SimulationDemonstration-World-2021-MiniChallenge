@@ -184,9 +184,9 @@ class AbstractionLayer():
             """
 
         colorPos, self.actualTileType = self.robot.getColorDetection()
-        # print("Tile type: ", self.actualTileType)
-        #self.analyst.loadColorDetection(colorPos, self.actualTileType)
-        #self.isTrap = self.actualTileType == "hole"
+        print("Tile type: ", self.actualTileType)
+        self.analyst.loadColorDetection(colorPos, self.actualTileType)
+        self.isTrap = self.actualTileType == "hole"
         self.analyst.update(self.position, self.rotation)
 
         if self.isStraight(20):
