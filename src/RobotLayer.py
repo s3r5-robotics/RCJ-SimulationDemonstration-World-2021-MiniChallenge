@@ -1,3 +1,4 @@
+from DistanceSensor import DistanceSensor
 from controller import Robot
 import sys
 import numpy as np
@@ -7,7 +8,7 @@ import time
 # REMEMBER TO COPY-PASTE THIS FUNCTIONS ON TO FINAL CODE
 # v Put files directory here v
 sys.path.append(
-    r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\src")
+    r"C:\Users\Maxi\Documents\program_robots\arg-slovenia\src")
 # Imports all utility functions
 from UtilityFunctions import *  # li
 
@@ -19,11 +20,17 @@ class Camera:
         self.camera.enable(timeStep)
         self.height = self.camera.getHeight()
         self.width = self.camera.getWidth()
-
-    # Gets an image from the raw camera data
+        self.distanceSensor = DistanceSensor()
     def getImg(self):
         imageData = self.camera.getImage()
         return np.array(np.frombuffer(imageData, np.uint8).reshape((self.height, self.width, 4)))
+
+    def getDistance(self):
+        self.distanceSensor.distanceCalculation(self.getImg())
+    # Gets an image from the raw camera data
+    
+
+
 
 
 # Tracks global rotation
@@ -526,3 +533,4 @@ class RobotLayer:
         self.comunicator.update()
 
         #time.sleep(0.1)
+        print(self.centerCamera.getDistance())
