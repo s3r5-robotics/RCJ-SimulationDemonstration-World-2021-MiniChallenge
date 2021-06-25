@@ -525,4 +525,4 @@ class RobotLayer:
         # Updates emmiter and reciever
         self.comunicator.update()
 
-        time.sleep(0.1)
+        #time.sleep(0.1)
