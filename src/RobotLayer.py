@@ -1,5 +1,4 @@
-from DistanceSensor import DistanceSensor
-from controller import Robot
+from controller import *
 import sys
 import numpy as np
 import struct
@@ -11,6 +10,7 @@ sys.path.append(
     r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\src")
 # Imports all utility functions
 from UtilityFunctions import *  # li
+from DistanceSensor import DistanceSensor # li
 
 
 # Captures images and processes them
@@ -28,7 +28,7 @@ class Camera:
     def getDistance(self):
         return self.distanceSensor.distanceCalculation(self.getImg())
     # Gets an image from the raw camera data
-    
+
 
 
 
@@ -132,11 +132,11 @@ class Wheel:
             ratio = -1
         self.velocity = ratio * self.maxVelocity
         self.wheel.setVelocity(self.velocity)
-    
+
     def getLinearVelocity(self):
         return (self.velocity / (2 * math.pi)) * self.circumference
 
-    
+
 
 
 # Reads the colour sensor
@@ -496,7 +496,7 @@ class RobotLayer:
         if self.rightWheel.velocity + self.leftWheel.velocity == 0:
             return 0
         return (self.rightWheel.velocity + self.leftWheel.velocity) / 2
-    
+
     def getWheelLinearVelocity(self):
         if self.rightWheel.getLinearVelocity() + self.leftWheel.getLinearVelocity() == 0:
             return 0
@@ -530,7 +530,7 @@ class RobotLayer:
         # print("Acc position:", str())
         self.globalPosition[0] += self.positionOffsets[0]
         self.globalPosition[1] += self.positionOffsets[1]
-        
+
 
         # Updates emmiter and reciever
         self.comunicator.update()

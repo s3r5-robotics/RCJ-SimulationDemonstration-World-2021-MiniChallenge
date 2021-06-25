@@ -1,4 +1,4 @@
-from controller import Robot, Camera
+from controller import *
 import cv2 as cv
 import numpy as np
 
