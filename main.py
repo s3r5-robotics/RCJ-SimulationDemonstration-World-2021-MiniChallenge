@@ -235,7 +235,7 @@ class Camera:
         return np.array(np.frombuffer(imageData, np.uint8).reshape((self.height, self.width, 4)))
 
     def getDistance(self):
-        self.distanceSensor.distanceCalculation(self.getImg())
+        return self.distanceSensor.distanceCalculation(self.getImg())
     # Gets an image from the raw camera data
 
 
@@ -710,7 +710,10 @@ class RobotLayer:
         if self.rightWheel.getLinearVelocity() + self.leftWheel.getLinearVelocity() == 0:
             return 0
         return (self.rightWheel.getLinearVelocity() + self.leftWheel.getLinearVelocity()) / 2
-
+    
+    def getDistanceToWall(self):
+        return self.centerCamera.getDistance()
+        
     # Must run every TimeStep
     def update(self):
         # Updates the current time
@@ -742,7 +745,7 @@ class RobotLayer:
         self.comunicator.update()
 
         #time.sleep(0.1)
-        print(self.centerCamera.getDistance())
+        
 
 
 
@@ -888,6 +891,13 @@ class AbstractionLayer():
     def timeLeft(self):
         return self.timeInRound - self.robot.time
 
+    def isStraight(self, limit):
+        for ang in (0, 360, 90, 270, 180):
+            diff = max(ang, self.rotation) - min(ang, self.rotation)
+            if diff <= limit:
+                return True
+        return False
+
     def update(self):
         self.robot.update()
 
@@ -923,9 +933,12 @@ class AbstractionLayer():
 
         colorPos, self.actualTileType = self.robot.getColorDetection()
         # print("Tile type: ", self.actualTileType)
-        self.analyst.loadColorDetection(colorPos, self.actualTileType)
-        self.isTrap = self.actualTileType == "hole"
+        #self.analyst.loadColorDetection(colorPos, self.actualTileType)
+        #self.isTrap = self.actualTileType == "hole"
         self.analyst.update(self.position, self.rotation)
+        
+        if self.isStraight(20):
+            self.analyst.loadDistanceDetection(self.robot.getDistanceToWall())
 
         self.gridPlotter.reset()
 
@@ -961,18 +974,23 @@ class AbstractionLayer():
 
 class WallFilter():
     def __init__(self):
-        self.hue_min = 0
-        self.hue_max = 40
-        self.saturation_min = 11
+        self.hue_min = 50
+        self.hue_max = 100
+        
+        self.saturation_min = 0
         self.saturation_max = 255
+
         self.min_value = 0
-        self.max_value = 22
+        self.max_value = 255
         self.lower = np.array([self.hue_min, self.saturation_min, self.min_value])
         self.upper = np.array([self.hue_max, self.saturation_max, self.max_value])
 
     def showWallFilterMask(self, cameraImage):
         hsv_image = cv.cvtColor(cameraImage, cv.COLOR_BGRA2BGR)
+        hsv_image = cv.cvtColor(hsv_image, cv.COLOR_BGR2HSV)
+
         mask = cv.inRange(hsv_image, self.lower, self.upper)
+        cv.imshow("Mask", mask)
         return mask
 
     def showWallFilterImgResult(self, cameraImage):
@@ -999,8 +1017,8 @@ class DistanceSensor():
         pixels_height_base = 52
         if pixels_height != 0:
             distance = ( pixels_height_base * distanceBase)/ pixels_height
-            print(f"distanceCamera Normal--> {distance}\t distanceCamera Mapped--> {mapVals(distance, 0, 80, 0, 32)}")
-        else: pass
+            return mapVals(distance, 0, 80, 0, 0.32)
+        else: return None
 
 
 
@@ -1054,9 +1072,7 @@ class WallNode:
             self.__occupied = False
 
     def getString(self):
-        if len(self.fixtures):
-            returnString = "".join(self.fixtures)
-        elif self.occupied:
+        if self.occupied:
             returnString = "1"
         else:
             returnString = "0"
@@ -1216,14 +1232,73 @@ class Grid:
     def setNode(self, position, value, side=[0, 0]):
         self.setRawNode(self.processedToRawNode(position, side), value)
 
+    def quadrupleTile(self, rawNodePosition):
+        quad = []
+        tileType = self.getRawNode(rawNodePosition).getString()
+        for adj in ((0, -1), (-1, 0)):
+            isOccupied = self.getRawNode(sumLists(adj, rawNodePosition)).occupied
+            if adj == (0, -1):
+                side = isOccupied
+            elif adj == (-1, 0):
+                top = isOccupied
+        
+        if top and side:
+            quad = [["1", "1", "1", "1"],
+                    ["1", tileType, "0", tileType],
+                    ["1", "0", "0", "0"],
+                    ["1", tileType, "0", tileType]]
+        
+        elif top:
+            quad = [["1", "1", "1", "1"],
+                    ["0", tileType, "0", tileType],
+                    ["0", "0", "0", "0"],
+                    ["0", tileType, "0", tileType]]
+        
+        elif side:
+            quad = [["1", "0", "0", "0"],
+                    ["1", tileType, "0", tileType],
+                    ["1", "0", "0", "0"],
+                    ["1", tileType, "0", tileType]]
+        
+        else:
+            quad = [["0", "0", "0", "0"],
+                    ["0", tileType, "0", tileType],
+                    ["0", "0", "0", "0"],
+                    ["0", tileType, "0", tileType]]
+        
+        return quad
+
+        
+
+
+
     def getArrayRepresentation(self):
         grid = []
-        for y in self.grid:
+        for y in range(len(self.grid)):
             row = []
-            for node in y:
-                row.append(node.getString())
-            grid.append(row)
-        return np.array(grid)
+            for x in range(len(self.grid[y])):
+                node = [x - self.offsets[0], y - self.offsets[1]]
+                if isinstance(self.getRawNode(node), TileNode):
+                    
+                    if len(row):
+                        row = np.vstack((row, np.array(self.quadrupleTile(node))))
+                    else:
+                        row = np.array(self.quadrupleTile(node))
+
+            print("Row Lenght:", len(row))
+            print(row)
+            if len(row):
+                if len(grid):
+                    grid = np.hstack((grid, row))
+                else:
+                    grid = row
+            print("Grid lenght:", len(grid))
+
+        
+        #with open(r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\src\\finalGrid.txt", "w") as file:
+            #file.write(str(np.ndarray.tolist(grid)))
+
+        return grid
 
     def getNumpyPrintableArray(self):
         printableArray = np.zeros(self.size, np.uint8)
@@ -1486,7 +1561,7 @@ class Analyst:
         self.calculatePath = True
         self.stoppedMoving = False
         self.pathIndex = 0
-        self.positionReachedThresh = 0.04
+        self.positionReachedThresh = 0.01
         self.prevRawNode = [0, 0]
         self.ended = False
 
@@ -1500,8 +1575,10 @@ class Analyst:
     def loadColorDetection(self, colorSensorPosition, tileType):
         convPos = self.getTile(colorSensorPosition)
         self.grid.getNode(convPos).tileType = tileType
+        """
         if tileType == "hole":
             self.calculatePath = True
+        """
 
     def getQuadrant(self, posInTile):
         if posInTile[0] > self.tileSize / 2:
@@ -1555,6 +1632,33 @@ class Analyst:
     def getArrayRepresentation(self):
         return self.grid.getArrayRepresentation()
 
+    def loadDistanceDetection(self, distance):
+        print("Camera distance:", distance)
+        if distance is not None:
+            """
+            if self.tileSize * 0.9 < distance < self.tileSize * 1:
+                print("Should put wall")
+                dir = multiplyLists(self.direction, [3, 3])
+                facingWall = sumLists(self.startRawNode, dir)
+                self.grid.getRawNode(facingWall).occupied = True
+                #self.calculatePath = True
+            """
+            if distance < 0.10:
+                print("Should put wall")
+                dir = multiplyLists(self.direction, [1, 1])
+                facingWall = sumLists(self.startRawNode, dir)
+                for adj in ((0, 1), (0, -1), (1, 0), (-1, 0)):
+                    adjacent = self.grid.getRawNode(sumLists(facingWall, adj))
+                    if isinstance(adjacent, VortexNode):
+                        adjacent.occupied = True
+                        print("VORTEX!")
+                    else:
+                        print("NO VORTEX!")
+
+                self.grid.getRawNode(facingWall).occupied = True
+                self.calculatePath = True
+
+
     def update(self, position, rotation):
         self.direction = self.getQuadrantFromDegs(rotation)
 
@@ -1603,8 +1707,8 @@ class Analyst:
             self.calculatePath = False
 
     def getBestRawNodeToMove(self):
-        # print("Best path: ", self.__bestPath)
-        # print("Index: ", self.pathIndex)
+        print("Best path: ", self.__bestPath)
+        print("Index: ", self.pathIndex)
         if len(self.__bestPath):
             return self.__bestPath[self.pathIndex]
         else:
@@ -1672,7 +1776,7 @@ while r.doLoop():
 
     if stMg.checkState("init"):
         if r.calibrate():
-            stMg.changeState("moveForward")
+            stMg.changeState("followBest")
 
     if stMg.checkState("stop"):
         r.seqMg.startSequence()
