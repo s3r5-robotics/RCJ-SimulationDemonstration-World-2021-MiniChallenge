@@ -7,7 +7,7 @@ import time
 # REMEMBER TO COPY-PASTE THIS FUNCTIONS ON TO FINAL CODE
 # v Put files directory here v
 sys.path.append(
-    r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\Participants\\Alejandro")
+    r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\src")
 # Imports all utility functions
 from UtilityFunctions import *  # li
 
@@ -112,6 +112,8 @@ class Wheel:
         self.maxVelocity = maxVelocity
         self.wheel = wheel
         self.velocity = 0
+        self.diameter = 0.0205 * 2
+        self.circumference = math.pi * self.diameter
         self.wheel.setPosition(float("inf"))
         self.wheel.setVelocity(0)
 
@@ -123,6 +125,11 @@ class Wheel:
             ratio = -1
         self.velocity = ratio * self.maxVelocity
         self.wheel.setVelocity(self.velocity)
+    
+    def getLinearVelocity(self):
+        return (self.velocity / (2 * math.pi)) * self.circumference
+
+    
 
 
 # Reads the colour sensor
@@ -276,6 +283,26 @@ class Comunicator:
         else:
             self.doGetWordInfo = True
 
+class Odometry:
+    def __init__(self, timeStep):
+        self.timeStep = timeStep
+        self.oldTime = 0
+        self.position = [0, 0]
+
+
+    def update(self, time, rotation, robotVelocity):
+        timeElapsed = time - self.oldTime
+        print("Time elapsed:", timeElapsed)
+        distanceTraveled = robotVelocity * timeElapsed
+        positionInTimestep = list(getCoordsFromDegs(rotation, distanceTraveled))
+        print("pos in time Step:", positionInTimestep)
+        self.position = [self.position[0] + positionInTimestep[0], self.position[1] + positionInTimestep[1]] #sumLists(self.position, positionInTimestep)
+        print("odom Position:", self.position)
+        self.oldTime = time
+
+    def getPosition(self):
+        return tuple(self.position)
+
 
 # Abstraction layer for robot
 class RobotLayer:
@@ -303,6 +330,7 @@ class RobotLayer:
         self.gyroscope = Gyroscope(self.robot.getDevice("gyro"), 1, self.timeStep)
         self.accelerometer = Accelerometer(self.robot.getDevice("accelerometer"), [0, 1, 2], self.timeStep)
         self.leftWheel = Wheel(self.robot.getDevice("wheel1 motor"), self.maxWheelSpeed)
+        self.odometry = Odometry(self.timeStep)
         self.rightWheel = Wheel(self.robot.getDevice("wheel2 motor"), self.maxWheelSpeed)
         self.colorSensor = ColourSensor(self.robot.getDevice("colour_sensor"), 0.037, 32)
         self.comunicator = Comunicator(self.robot.getDevice("emitter"), self.robot.getDevice("receiver"), self.timeStep)
@@ -457,34 +485,42 @@ class RobotLayer:
         return self.robot.step(self.timeStep) != -1
 
     # Returns if the wheels are generally moving forward or backwards
-    def getWheelDirection(self):
+    def getWheelVelocity(self):
         if self.rightWheel.velocity + self.leftWheel.velocity == 0:
             return 0
         return (self.rightWheel.velocity + self.leftWheel.velocity) / 2
-
+    
+    def getWheelLinearVelocity(self):
+        if self.rightWheel.getLinearVelocity() + self.leftWheel.getLinearVelocity() == 0:
+            return 0
+        return (self.rightWheel.getLinearVelocity() + self.leftWheel.getLinearVelocity()) / 2
+        
     # Must run every TimeStep
     def update(self):
         # Updates the current time
         self.time = self.robot.getTime()
         # Updates the gps, gyroscope
         self.gyroscope.update(self.time)
-        self.accelerometer.update(self.time)
-
-        # Saves the previous global position
-        self.prevGlobalPosition = self.globalPosition
-        # Gets global position and applies offsets
-        self.globalPosition = self.accelerometer.getPos()
-
-        # print("Acc position:", str())
-
-        self.globalPosition[0] += self.positionOffsets[0]
-        self.globalPosition[1] += self.positionOffsets[1]
+        #self.accelerometer.update(self.time)
 
         # Saves the previous rotation
         self.prevRotation = self.rotation
 
         # Gets global rotation
         self.rotation = self.gyroscope.getDegrees()
+
+        self.odometry.update(self.time, self.rotation, self.getWheelLinearVelocity())
+
+        # Saves the previous global position
+        self.prevGlobalPosition = self.globalPosition
+        # Gets global position and applies offsets
+        self.globalPosition = list(self.odometry.getPosition()) #self.accelerometer.getPos()
+        print("wheelVelocity:", self.getWheelLinearVelocity())
+
+        # print("Acc position:", str())
+        self.globalPosition[0] += self.positionOffsets[0]
+        self.globalPosition[1] += self.positionOffsets[1]
+        
 
         # Updates emmiter and reciever
         self.comunicator.update()

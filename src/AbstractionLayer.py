@@ -5,7 +5,7 @@ import cv2 as cv
 
 # REMEMBER TO COPY-PASTE THIS FUNCTIONS ON TO FINAL CODE
 sys.path.append(
-    r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\Participants\\Alejandro")
+    r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\src")
 from UtilityFunctions import *  # li
 from StateMachines import *  # li
 from RobotLayer import *  # li
@@ -104,7 +104,7 @@ class AbstractionLayer():
             self.robot.positionOffsets = [0.06, 0.06]
 
             print("positionOffsets: ", self.robot.positionOffsets)
-        if self.seqMg.simpleSeqEvent(): self.analyst.registerStart()
+        #if self.seqMg.simpleSeqEvent(): self.analyst.registerStart()
         self.seqMoveWheels(0, 0)
         if self.seqMg.simpleSeqEvent(): self.doWallMapping = True
         return self.seqMg.seqResetSequence()
@@ -151,7 +151,7 @@ class AbstractionLayer():
         # print("time without moving: ", self.timeWithoutMoving)
         # print("time left:", self.timeLeft)
         diff = [self.position[0] - self.prevPosition[0], self.position[1] - self.prevPosition[1]]
-        if self.robot.getWheelDirection() < 0.1:
+        if self.robot.getWheelVelocity() < 0.1:
             self.timeWithoutMoving = 0
         elif -0.0001 < getDistance(diff) < 0.0001:
             if self.timeWithoutMoving == 0:
@@ -179,12 +179,13 @@ class AbstractionLayer():
 
         colorPos, self.actualTileType = self.robot.getColorDetection()
         # print("Tile type: ", self.actualTileType)
-        self.analyst.loadColorDetection(colorPos, self.actualTileType)
-        self.isTrap = self.actualTileType == "hole"
+        #self.analyst.loadColorDetection(colorPos, self.actualTileType)
+        #self.isTrap = self.actualTileType == "hole"
         self.analyst.update(self.position, self.rotation)
 
         self.gridPlotter.reset()
 
+    
         bestPos = self.analyst.getStartRawNodePos()
         if bestPos is not None:
             self.gridPlotter.plotPoint(bestPos, 255)
@@ -193,7 +194,8 @@ class AbstractionLayer():
         if bestPos is not None:
             self.gridPlotter.plotPoint(bestPos, 200)
 
-        # self.gridPlotter.plotPoint(self.position, 150)
+        self.gridPlotter.plotPoint(self.position, 150)
+        
 
         bestPoses = self.analyst.getBestPoses()
         for bestPos in bestPoses:

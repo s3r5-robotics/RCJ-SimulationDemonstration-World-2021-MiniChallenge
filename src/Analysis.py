@@ -4,7 +4,7 @@ import sys
 import copy
 
 sys.path.append(
-    r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\Participants\\Alejandro")
+    r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\src")
 from UtilityFunctions import *  # li
 
 
@@ -482,7 +482,7 @@ class Analyst:
         self.calculatePath = True
         self.stoppedMoving = False
         self.pathIndex = 0
-        self.positionReachedThresh = 0.01
+        self.positionReachedThresh = 0.04
         self.prevRawNode = [0, 0]
         self.ended = False
 
@@ -557,7 +557,7 @@ class Analyst:
         self.direction = self.getQuadrantFromDegs(rotation)
 
         posInTile = self.getPosInTile(position)
-        quadrant = self.getQuadrant(posInTile)
+        quadrant = [0, 0]
         self.tile = self.getTile(position)
         startRawNode = self.grid.processedToRawNode(self.tile)
         self.startRawNode = startRawNode
