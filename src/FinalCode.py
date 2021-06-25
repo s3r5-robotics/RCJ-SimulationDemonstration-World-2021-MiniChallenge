@@ -1,4 +1,4 @@
-from controller import Robot
+from controller import *
 import sys
 import numpy as np
 import cv2 as cv
@@ -55,7 +55,7 @@ while r.doLoop():
         r.seqRotateToDegs(0)
         r.seqDelaySec(0.1)
         r.seqResetSequence()
-        
+
 
     if stMg.checkState("followBest"):
         r.seqMg.startSequence()

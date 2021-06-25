@@ -1,4 +1,4 @@
-from controller import Robot
+from controller import *
 import sys
 import numpy as np
 import cv2 as cv
@@ -196,7 +196,7 @@ class AbstractionLayer():
             self.gridPlotter.plotPoint(bestPos, 200)
 
         self.gridPlotter.plotPoint(self.position, 150)
-        
+
 
         bestPoses = self.analyst.getBestPoses()
         for bestPos in bestPoses:
