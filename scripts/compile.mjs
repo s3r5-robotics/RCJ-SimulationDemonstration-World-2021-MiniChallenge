@@ -2,7 +2,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 const IMPORT_REGEX = /(from .* import .*)|(import .*)/gm;
-const IMPORT_IGNORE_REGEX = /((from controller import \*)|(from|import) .*(#( |)li))/gm;
+const IMPORT_IGNORE_REGEX = /(from|import) .*(#( |)li)/gm;
 const PATHING_REGEX = /sys\.path\.append\((\n|)(.*)\)/gm;
 const EXTENSTION_REGEX = /.*\.py/gm;
 
@@ -19,7 +19,7 @@ const SOURCES = [
 const imports = new Set();
 const srcDir = new URL('../src/', import.meta.url);
 
-let OUT = ''
+let OUT = '';
 
 for (let source of SOURCES) {
     if (!EXTENSTION_REGEX.test(source)) source += '.py';

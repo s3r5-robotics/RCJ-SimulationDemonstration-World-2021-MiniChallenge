@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from controller import *
 import sys
 import struct
 import time
@@ -922,8 +923,8 @@ class AbstractionLayer():
 
         colorPos, self.actualTileType = self.robot.getColorDetection()
         # print("Tile type: ", self.actualTileType)
-        #self.analyst.loadColorDetection(colorPos, self.actualTileType)
-        #self.isTrap = self.actualTileType == "hole"
+        self.analyst.loadColorDetection(colorPos, self.actualTileType)
+        self.isTrap = self.actualTileType == "hole"
         self.analyst.update(self.position, self.rotation)
 
         self.gridPlotter.reset()
@@ -1499,10 +1500,8 @@ class Analyst:
     def loadColorDetection(self, colorSensorPosition, tileType):
         convPos = self.getTile(colorSensorPosition)
         self.grid.getNode(convPos).tileType = tileType
-        """
         if tileType == "hole":
             self.calculatePath = True
-        """
 
     def getQuadrant(self, posInTile):
         if posInTile[0] > self.tileSize / 2:
