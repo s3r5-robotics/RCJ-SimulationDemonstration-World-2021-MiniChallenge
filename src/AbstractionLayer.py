@@ -104,7 +104,7 @@ class AbstractionLayer():
             self.robot.positionOffsets = [0.06, 0.06]
 
             print("positionOffsets: ", self.robot.positionOffsets)
-        #if self.seqMg.simpleSeqEvent(): self.analyst.registerStart()
+        if self.seqMg.simpleSeqEvent(): self.analyst.registerStart()
         self.seqMoveWheels(0, 0)
         if self.seqMg.simpleSeqEvent(): self.doWallMapping = True
         return self.seqMg.seqResetSequence()
@@ -185,10 +185,11 @@ class AbstractionLayer():
 
         self.gridPlotter.reset()
 
-    
+        """
         bestPos = self.analyst.getStartRawNodePos()
         if bestPos is not None:
             self.gridPlotter.plotPoint(bestPos, 255)
+        """
 
         bestPos = self.analyst.getBestPosToMove()
         if bestPos is not None:

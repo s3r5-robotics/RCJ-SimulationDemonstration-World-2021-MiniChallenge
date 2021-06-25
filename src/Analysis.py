@@ -238,6 +238,8 @@ class Grid:
                         printableArray[x][y] = 60
                     elif node.tileType == "swamp":
                         printableArray[x][y] = 80
+                    elif node.traversed:
+                        printableArray[x][y] = 150
 
                 elif isinstance(node, VortexNode):
                     if node.occupied:

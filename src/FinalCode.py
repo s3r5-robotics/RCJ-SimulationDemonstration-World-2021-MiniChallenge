@@ -29,7 +29,7 @@ while r.doLoop():
 
     if stMg.checkState("init"):
         if r.calibrate():
-            stMg.changeState("followBest")
+            stMg.changeState("moveForward")
 
     if stMg.checkState("stop"):
         r.seqMg.startSequence()
@@ -37,13 +37,25 @@ while r.doLoop():
 
     if stMg.checkState("moveForward"):
         r.seqMg.startSequence()
-        r.seqMoveWheels(0.5, 0.5)
-        r.seqDelaySec(1)
+        r.seqMoveWheels(0.8, 0.8)
+        r.seqDelaySec(2.2)
         r.seqMoveWheels(0, 0)
-        """
+        r.seqRotateToDegs(270)
+        r.seqMoveWheels(0.8, 0.8)
+        r.seqDelaySec(3.5)
+        r.seqMoveWheels(0, 0)
+        r.seqRotateToDegs(180)
+        r.seqMoveWheels(0.8, 0.8)
+        r.seqDelaySec(2.2)
+        r.seqMoveWheels(0, 0)
+        r.seqRotateToDegs(90)
+        r.seqMoveWheels(0.8, 0.8)
+        r.seqDelaySec(3.5)
+        r.seqMoveWheels(0, 0)
+        r.seqRotateToDegs(0)
         r.seqDelaySec(0.1)
         r.seqResetSequence()
-        """
+        
 
     if stMg.checkState("followBest"):
         r.seqMg.startSequence()
