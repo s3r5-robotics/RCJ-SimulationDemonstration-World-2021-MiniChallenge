@@ -35,7 +35,7 @@ for (let source of SOURCES) {
         .replace(IMPORT_IGNORE_REGEX, '')
         .replace(PATHING_REGEX, '');
 
-    for (const imprt of RAW_PRE.match(IMPORT_REGEX) ?? []) imports.add(imprt);
+    for (const imprt of (RAW_PRE.match(IMPORT_REGEX) == undefined ?  [] : RAW_PRE.match(IMPORT_REGEX) )) imports.add(imprt);
 
     const END = RAW_PRE
         .replace(IMPORT_REGEX, '');
