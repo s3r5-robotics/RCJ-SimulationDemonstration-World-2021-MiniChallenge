@@ -23,7 +23,9 @@ let OUT = '';
 let OUT_HEADER = '';
 
 OUT_HEADER += '# https://github.com/s3r5-robotics/SimulationDemonstration-2021-MiniChallenge';
-OUT_HEADER += '\n\n';
+OUT_HEADER += '\n';
+
+const generateImportHeader = () => [...imports.values()].map((impr) => `${impr}\n`).toString().replace(/,/gm, '');
 
 for (let source of SOURCES) {
     if (!EXTENSTION_REGEX.test(source)) source += '.py';
@@ -42,4 +44,8 @@ for (let source of SOURCES) {
     OUT += END;
 }
 
-fs.writeFileSync(fileURLToPath(new URL('../main.py', srcDir)), `${OUT_HEADER}${[...imports.values()].map((impr) => `${impr}\n`).toString().replace(/,/gm, '')}\n${OUT}`);
+fs.writeFileSync(fileURLToPath(new URL('../main.py', srcDir)), [
+    OUT_HEADER,
+    generateImportHeader(),
+    OUT
+].join('\n'));
