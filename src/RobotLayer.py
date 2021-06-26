@@ -161,7 +161,7 @@ class ColourSensor:
         print("Colour:", self.r, self.g, self.b)
 
     def __isTrap(self):
-        return (0 < self.r < 50 and 0 < self.g < 50)
+        return (0 < self.r < 50 and 0 < self.g < 50) and not (30 < self.r < 36 and 30 < self.g < 36)
 
     def __isSwamp(self):
         return (200 < self.r < 210 and 165 < self.g < 175 and 95 < self.b < 105)
