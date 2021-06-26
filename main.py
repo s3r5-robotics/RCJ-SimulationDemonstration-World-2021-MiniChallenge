@@ -3,9 +3,7 @@
 import math
 import numpy as np
 from controller import *
-import sys
 import struct
-import time
 import cv2 as cv
 import copy
 
@@ -220,7 +218,6 @@ class SequenceManager:
 
 
 
-
 # Imports all utility functions
 
 
@@ -375,7 +372,7 @@ class ColourSensor:
         print("Colour:", self.r, self.g, self.b)
 
     def __isTrap(self):
-        return (0 < self.r < 50 and 0 < self.g < 50)
+        return (0 < self.r < 50 and 0 < self.g < 50) and not (30 < self.r < 36 and 30 < self.g < 36)
 
     def __isSwamp(self):
         return (200 < self.r < 210 and 165 < self.g < 175 and 95 < self.b < 105)
@@ -748,13 +745,6 @@ class RobotLayer:
 
 
 
-
-
-
-
-
-
-
 class PlottingArray:
     def __init__(self, size, offsets, scale, tileSize):
         self.scale = scale
@@ -966,9 +956,6 @@ class AbstractionLayer():
 
 
 
-
-
-
 class WallFilter():
     def __init__(self):
         self.hue_min = 50
@@ -1017,9 +1004,6 @@ class DistanceSensor():
             return mapVals(distance, 0, 80, 0, 0.32)
         else: return None
 # File: "Analysis.py"
-
-
-
 
 
 
@@ -1291,10 +1275,20 @@ class Grid:
                 else:
                     grid = row
             print("Grid lenght:", len(grid))
-
         
-        #with open(r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\src\\finalGrid.txt", "w") as file:
-            #file.write(str(np.ndarray.tolist(grid)))
+        grid = np.flip(grid, 0)
+
+        """
+        with open(r"C:\\Users\\ANA\\Desktop\\Webots - Erebus\\Mini challenge 2020\\SimulationDemonstration-2021-MiniChallenge\\src\\finalGrid.txt", "w") as file:
+            finalText = ""
+            for npRow in grid:
+                row = np.ndarray.tolist(npRow)
+                finalText = finalText + "\n" + str(row)
+                finalText = finalText.replace('"', '')
+                finalText = finalText.replace(',', ' ')
+                finalText = finalText.replace('0', ' ')
+            file.write(finalText)
+        """
 
         return grid
 
@@ -1537,6 +1531,7 @@ class PathFinder:
         print("Best Node:", bestNode)
         print("AStar PATH: ", bestPath)
         print("Start Tile: ", self.startTile)
+        if bestPath == None: bestPath = []
         return bestPath
 
 
@@ -1548,7 +1543,7 @@ class Analyst:
         # Grid
         gridChunk = np.array([[VortexNode(), WallNode()],
                               [WallNode(), TileNode()]])
-        self.grid = Grid(gridChunk, (100, 100))
+        self.grid = Grid(gridChunk, (60, 60))
         # Path finder
         self.pathFinder = PathFinder(VortexNode, WallNode, TileNode, self.grid, 10, [0, 0])
         self.pathFinder.setStartTile((0, 0))
@@ -1560,7 +1555,9 @@ class Analyst:
         self.stoppedMoving = False
         self.pathIndex = 0
         self.positionReachedThresh = 0.01
+        self.startRawNode = [0, 0]
         self.prevRawNode = [0, 0]
+        self.tile = [0, 0]
         self.ended = False
 
     def getRawAdjacents(self, node, side):
@@ -1572,11 +1569,15 @@ class Analyst:
 
     def loadColorDetection(self, colorSensorPosition, tileType):
         convPos = self.getTile(colorSensorPosition)
-        self.grid.getNode(convPos).tileType = tileType
-        """
-        if tileType == "hole":
-            self.calculatePath = True
-        """
+        print("startNode:", self.tile)
+        print("Color detection:", convPos)
+        if tileType == "hole"  and self.tile == convPos:
+            frontTile = multiplyLists(self.direction, [2, 2])
+            front = sumLists(self.startRawNode, frontTile)
+            self.grid.getRawNode(front).tileType = "hole"
+        else:
+            self.grid.getNode(convPos).tileType = tileType
+
 
     def getQuadrant(self, posInTile):
         if posInTile[0] > self.tileSize / 2:
@@ -1710,7 +1711,7 @@ class Analyst:
         if len(self.__bestPath):
             return self.__bestPath[self.pathIndex]
         else:
-            return None
+            return []
 
     def getBestPosToMove(self):
         bestRawNode = self.getBestRawNodeToMove()
@@ -1745,9 +1746,6 @@ class Analyst:
         cv.imshow("Analyst grid",
                   cv.resize(self.grid.getNumpyPrintableArray(), (400, 400), interpolation=cv.INTER_NEAREST))
 # File: "FinalCode.py"
-
-
-
 
 
 
